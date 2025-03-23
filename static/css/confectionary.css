@@ -1,0 +1,68 @@
+/* Глобальные стили */
+html, body {
+    height: 100%; /* Устанавливаем минимальную высоту в 100% */
+    margin: 0;
+  }
+  
+  .content-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+  }
+  
+  .content {
+    flex: 1; /* Контент будет растягиваться, занимая оставшееся пространство */
+  }
+  
+  /* navbar */
+  .navbar {
+    background-color: #fcf5fb; /* Бледно-розовый фон */
+  }
+  
+  /* Стиль для активных ссылок */
+  .navbar .nav-link.active {
+    font-weight: bold; 
+    color: #721c24 !important; 
+  }
+  
+  /* Стиль для неактивных ссылок */
+  .navbar .nav-link {
+    color: #495057; 
+  }
+  
+  /* Стиль для картинок в navbar */
+  .navbar .d-flex a img {
+    transition: transform 0.3s ease, opacity 0.3s ease; /* Плавное увеличение и изменение прозрачности */
+  }
+  
+  /* Эффект на картинки при наведении */
+  .navbar .d-flex a:hover img {
+    transform: scale(1.1); /* Увеличение картинки */
+    opacity: 0.8; /* Немного уменьшить прозрачность */
+  }
+  
+  /* footer */
+  footer {
+    background-color: #fcf5fb;
+    text-align: center;
+    padding: 0.05rem 0;
+    margin-top: auto; /* Это гарантирует, что футер будет внизу */
+  }
+  
+  .footer-icons a {
+    margin-right: 1.5rem;
+  }
+
+  .footer-icons a:hover img{
+    transform: scale(1.1); /* Увеличение картинки */
+    opacity: 0.8; /* Немного уменьшить прозрачность */
+  }
+
+  .footer-icons a img {
+    display: inline-block;
+    vertical-align: middle;
+  }
+  
+  .low_footer {
+    background-color: #f7ebf5;
+  }

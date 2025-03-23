@@ -1,0 +1,104 @@
+{# https://django.fun/docs/django/5.0/ref/templates/builtins/#operator #}
+{# https://django.fun/docs/django/5.0/ref/templates/builtins/ фильтры #}
+{% load static %}
+
+<nav class="navbar navbar-expand-lg">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">
+      <img src="{% static 'img/cake.png' %}" alt="Лэйбл" width="30" height="30">
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+      data-bs-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" aria-expanded="false"
+      aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav mb-2 mb-lg-0 justify-between w-100">
+        <div class="d-flex flex-row align-items-center w-100">
+          <li class="nav-item">
+            <a
+              {% if request.resolver_match.url_name == 'main_page' %}
+              class="nav-link active"
+              {% else %}
+              class="nav-link"
+              {% endif %}
+              aria-current="page"
+              href="{% url 'Confectionary:main_page' %}">ГЛАВНАЯ</a>
+          </li>
+          <li class="nav-item">
+            <a
+              {% if request.resolver_match.url_name == 'showcase' %}
+              class="nav-link active"
+              {% else %}
+              class="nav-link"
+              {% endif %}
+              aria-current="page"
+              href="{% url 'Confectionary:showcase' %}">ОНЛАЙН-ВИТРИНА</a>
+          </li>
+          <li class="nav-item">
+            <a
+              {% if request.resolver_match.url_name == 'photo_album' %}
+              class="nav-link active"
+              {% else %}
+              class="nav-link"
+              {% endif %}
+              aria-current="page"
+              href="{% url 'Confectionary:photo_album' %}">ФОТОАЛЬБОМ</a>
+          </li>
+          <li class="nav-item">
+            <a
+              {% if request.resolver_match.url_name == 'custom_cakes' %}
+              class="nav-link active"
+              {% else %}
+              class="nav-link"
+              {% endif %}
+              aria-current="page"
+              href="{% url 'Confectionary:custom_cakes' %}">ТОРТЫ НА ЗАКАЗ</a>
+          </li>
+          <li class="nav-item">
+            <a
+              {% if request.resolver_match.url_name == 'delivery' %}
+              class="nav-link active"
+              {% else %}
+              class="nav-link"
+              {% endif %}
+              aria-current="page"
+              href="{% url 'Confectionary:delivery' %}">ДОСТАВКА</a>
+          </li>
+          <li class="nav-item">
+            <a
+              {% if request.resolver_match.url_name == 'employees' %}
+              class="nav-link active"
+              {% else %}
+              class="nav-link"
+              {% endif %}
+              aria-current="page"
+              href="{% url 'Confectionary:employees' %}">НАШИ РАБОТНИКИ</a>
+          </li>
+        </div>
+        <div class="d-flex">
+          <a
+            {% if request.resolver_match.url_name == 'trolley' %}
+            class="nav-link active"
+            {% else %}
+            class="nav-link"
+            {% endif %}
+            aria-current="page" href="{% url 'Confectionary:trolley' %}">
+            <img src="{% static 'img/trolley.png' %}" alt="Корзина" width="30"
+              height="30">
+          </a>
+          <a
+            {% if request.resolver_match.url_name == 'profile' %}
+            class="nav-link active"
+            {% else %}
+            class="nav-link"
+            {% endif %}
+            aria-current="page" href="{% url 'Confectionary:profile' %}">
+            <img src="{% static 'img/profile.png' %}" alt="Профиль" width="30"
+              height="30">
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
