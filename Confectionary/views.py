@@ -24,7 +24,10 @@ def main_page(request):
 
 
 def showcase(request):
-    return render(request, "showcase.html")
+    excluded_categories = CATEGORY_ICONS.keys()  # Получаем список названий категорий, которые нужно исключить
+    product_types = Product.objects.exclude(type__isnull=True).exclude(type="").values_list("type", flat=True).distinct()
+
+    return render(request, "showcase.html", {"product_types": product_types})
 
 
 def photo_album(request):
