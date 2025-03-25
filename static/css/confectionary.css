@@ -3,6 +3,10 @@ html, body {
     height: 100%; /* Устанавливаем минимальную высоту в 100% */
     margin: 0;
   }
+
+  a {
+    text-decoration: none;
+  }
   
   .content-wrapper {
     display: flex;
@@ -66,3 +70,29 @@ html, body {
   .low_footer {
     background-color: #f7ebf5;
   }
+
+  /* main_page */
+  .container {
+    margin-bottom: 3rem;
+  }
+  .part2 {
+    background-color: #fcf5fb;
+  }
+
+  .card {
+    border: 0.2rem solid;
+  }
+
+  .card-img-top {
+    height: 18rem;
+  }
+
+  .pink_card {
+    background-color: #fcf5fb;
+  }
+
+  
+
+
+  
+  

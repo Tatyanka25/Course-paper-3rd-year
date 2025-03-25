@@ -11,6 +11,8 @@
       integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
       crossorigin="anonymous">
     <link href="{% static 'css/confectionary.css' %}" rel="stylesheet">
+    <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   </head>
   <body>
     <div class="content-wrapper">
@@ -18,13 +20,130 @@
         {% include 'nav.html' %}
       </navigation>
 
-      <!-- Основной контент страницы -->
+      {% block content %}
       <div class="container mt-5">
-        {% block content %}
-        <h1>Добро пожаловать на сайт нашей кондитерской!</h1>
-        <p>Описание нашей продукции и услуг...</p>
-        {% endblock %}
+        <figure class="figure d-flex justify-content-center align-items-center">
+          <img src="{% static 'img/logo.png' %}"
+            class="figure-img img-fluid rounded"
+            alt="Логотип нашей кондитерской"
+            width="550rem"
+            height="400rem">
+        </figure>
+        <div class="row g-0 bg-body-first position-relative">
+          <div class="col-md-4 mb-md-0 p-md-4">
+            <img src="{% static 'img/about_us.jpg' %}" class="w-100 rounded"
+              alt="Наша кондитерская внутри">
+          </div>
+          <div class="col-md-8 p-4 ps-md-0">
+            <h2 class="mt-0">О нас</h2>
+            <p>Добро пожаловать в Whisk & Wonder – кондитерскую, где каждый
+              десерт создается с любовью, мастерством и вниманием к деталям. Мы
+              верим, что сладости – это не просто угощение, а настоящее
+              искусство, способное дарить радость, уют и незабываемые
+              эмоции.</p>
+            <h5>Наша история</h5>
+            <p>Все началось с маленькой пекарни, где мы, вдохновленные
+              классическими и современными рецептами, экспериментировали с
+              ингредиентами, создавая уникальные сочетания вкусов. Со временем
+              наша любовь к выпечке и желание радовать людей привели к созданию
+              Whisk & Wonder – места, где традиции и инновации объединяются,
+              чтобы создавать настоящие кулинарные шедевры.</p>
+            <h5>Наша миссия</h5>
+            <p>Мы хотим, чтобы каждый кусочек нашего десерта приносил вам
+              удовольствие, вдохновение и тепло. Whisk & Wonder – это не просто
+              кондитерская, а место, где оживают мечты, а сладости становятся
+              настоящей магией вкуса. Приходите к нам за сладкими чудесами – мы
+              с радостью создадим что-то особенное именно для вас!💕</p>
+            <p><button class="btn btn-sm btn-outline-secondary" type="button"
+                data-bs-toggle="collapse" data-bs-target="#collapseExample"
+                aria-expanded="false" aria-controls="collapseExample">
+                Меню напитков
+              </button></p>
+          </div>
+          <div class="collapse" id="collapseExample">
+            <div class="card card-body pink_card menu">
+              <h4 class="text-center">Меню напитков – Whisk & Wonder ☕🍹</h4>
+              {% for category in categories %}
+              <h6>{{ category.name }}</h6>
+              <div class="drink_menu">
+                {% for product in category.products.all %}
+                <p>
+                  <img src="{% static category.icon %}"
+                    alt="{{ category.name }} иконка" class="drink-icon"
+                    width="30rem" height="30rem">
+                  {{ product.name }} - {{ product.quantity }} мл | {{
+                  product.description }} | {{ product.price }} руб.
+                </p>
+                {% endfor %}
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
       </div>
+      <div class="part2">
+        <div class="container mt-5">
+          <div class="card p-3">
+            <h2 class="text-center">⭐️ Популярные товары ⭐️</h2>
+            <div class="row mt-4">
+              {% for product in popular_products %}
+              <div class="col-lg-4 col-md-12 mb-4">
+                <div class="card">
+                  <img src="{{ product.image.url }}"
+                    alt="{{ product.name }} image" class="card-img-top">
+                  <div class="card-body pink_card">
+                    <h5 class="card-title">{{product.name}}</h5>
+                    <p class="card-text">{{product.description}}</p>
+                    <a href="#"
+                      class="btn btn-sm btn-outline-secondary">Подробнее</a>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="part-contact">
+        <div class="container mt-5">
+          <!-- Контакты -->
+          <div class="row">
+            <div class="col-md-6">
+              <h3>Контакты</h3>
+              <p><strong>Адрес:</strong> ул. Циолковского, 16, Дзержинск,
+                Нижегородская область,
+                Россия</p>
+              <p><strong>График работы:</strong> ежедневно с 9:00 до 20:00</p>
+              <p><strong>Телефон:</strong> +7 (910) 393-05-02</p>
+              <p><strong>Email:</strong> lapshinatatyana25@mail.ru</p>
+              <a target="_blank" href="https://t.me/">
+                <img src="{% static 'img/telegram.png' %}" alt="Телеграм"
+                  width="40" height="40">
+              </a>
+              <a target="_blank" href="https://vk.com/">
+                <img src="{% static 'img/vk.png' %}" alt="ВК" width="40"
+                  height="40">
+              </a>
+              <a target="_blank" href="https://wa.me/">
+                <img src="{% static 'img/WhatsApp.png' %}" alt="WhatsApp"
+                  width="40" height="40">
+              </a>
+            </div>
+
+            <!-- Google Карта -->
+            <div class="col-md-6">
+              <div class="google-map-container">
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2217.477305878794!2d43.44550807750052!3d56.235266173266666!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x414e3a8d29039d91%3A0x8334102cf94f308a!2z0L_RgC4g0KbQuNC-0LvQutC-0LLRgdC60L7Qs9C-LCAxNiwg0JTQt9C10YDQttC40L3RgdC6LCDQndC40LbQtdCz0L7RgNC-0LTRgdC60LDRjyDQvtCx0LsuLCA2MDYwMjU!5e0!3m2!1sru!2sru!4v1742814317973!5m2!1sru!2sru"
+                  width="100%" height="350" style="border:0;" allowfullscreen
+                  loading="lazy"
+                  referrerpolicy="no-referrer-when-downgrade"></iframe>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endblock %}
 
       {% include 'footer.html' %}
 
