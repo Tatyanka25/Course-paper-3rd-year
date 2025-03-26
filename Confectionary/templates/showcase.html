@@ -5,14 +5,52 @@
     <h1>Онлайн-витрина</h1>
     <div class="row g-0 bg-body-first position-relative">
         <div class="col-md-3 mb-md-0 p-md-4">
-            <ul class="list-group">
+            <div class="list-group">
+                <a href="{% url 'Confectionary:showcase' %}"
+                    class="list-group-item {% if not selected_type %}active list-group-item-danger{% endif %}">Все</a>
                 {% for type in product_types %}
-                <li class="list-group-item" aria-current="true">{{type}}</li>
+                <a href="{% url 'Confectionary:showcase' %}?type={{ type }}"
+                    class="list-group-item {% if type == selected_type %}active list-group-item-danger{% endif %}">{{ type }}</a>
                 {% endfor %}
-            </ul>
+            </div>
         </div>
         <div class="col-md-9 p-4 ps-md-0">
+            <div class="row">
+                {% for product in products %}
+                <div class="col-12 col-md-12 col-lg-6 col-xl-6 col-xxl-4 mb-4">
+                    <div class="card mb-3 h-100 d-flex flex-column">
+                        <img src="{{ product.image.url }}" class="card-img-top img-fluid" alt="{{ product.name }}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ product.name }}</h5>
+                            <p class="card-text">{{ product.short_description }}</p>
+                            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#productModal{{ product.id }}">Подробнее</button>
+                            <a href="#"
+                                class="btn btn-sm btn-outline-secondary">Купить</a>
+                        </div>
+                    </div>
+                </div>
 
+                <!-- Модальное окно -->
+                <div class="modal fade" id="productModal{{ product.id }}" tabindex="-1" aria-labelledby="productModalLabel{{ product.id }}" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="productModalLabel{{ product.id }}">{{ product.name }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>{{ product.description }}</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p>Продукты не найдены.</p>
+                {% endfor %}
+            </div>
         </div>
     </div>
 </div>

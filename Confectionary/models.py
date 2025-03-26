@@ -23,6 +23,7 @@ class Category(models.Model):
 class Product(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField()
+    short_description = models.TextField(default="Описание отсутствует")
     price = models.DecimalField(max_digits=10, decimal_places=0)
     quantity = models.DecimalField(
         max_digits=10, decimal_places=0

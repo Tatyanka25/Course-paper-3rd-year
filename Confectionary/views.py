@@ -12,22 +12,50 @@ CATEGORY_ICONS = {
 
 def main_page(request):
     category_names = CATEGORY_ICONS.keys()
-    categories = Category.objects.prefetch_related("products").filter(name__in=category_names)
+    categories = Category.objects.prefetch_related("products").filter(
+        name__in=category_names
+    )
     for category in categories:
-        category.icon = CATEGORY_ICONS.get(
-            category.name, "img/default_icon.png"
-        )  
+        category.icon = CATEGORY_ICONS.get(category.name, "img/default_icon.png")
 
     popular_products = Product.objects.filter(is_popular=True)
 
-    return render(request, "main_page.html", {"categories": categories, "popular_products": popular_products})
+    return render(
+        request,
+        "main_page.html",
+        {"categories": categories, "popular_products": popular_products},
+    )
 
 
 def showcase(request):
-    excluded_categories = CATEGORY_ICONS.keys()  # Получаем список названий категорий, которые нужно исключить
-    product_types = Product.objects.exclude(type__isnull=True).exclude(type="").values_list("type", flat=True).distinct()
+    selected_type = request.GET.get("type", "")
+    dessert_category = Category.objects.get(name="Десерты")
+    dessert_products = (
+        Product.objects.filter(category=dessert_category)
+        if dessert_category
+        else Product.objects.none()
+    )
+    if selected_type:
+        dessert_products = dessert_products.filter(type=selected_type)
+    product_types = (
+        Product.objects.filter(category=dessert_category)
+        .exclude(type__isnull=True)
+        .exclude(type__exact="")
+        .values_list("type", flat=True)
+        .distinct()
+        if dessert_category
+        else []
+    )
 
-    return render(request, "showcase.html", {"product_types": product_types})
+    return render(
+        request,
+        "showcase.html",
+        {
+            "product_types": product_types,
+            "products": dessert_products,
+            "selected_type": selected_type,
+        },
+    )
 
 
 def photo_album(request):
