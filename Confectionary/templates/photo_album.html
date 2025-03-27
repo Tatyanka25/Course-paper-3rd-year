@@ -1,5 +1,50 @@
 {% extends 'main_page.html' %}
 {% load static %}
- 
+
 {% block content %}
+<div class="container mt-5 mb-0">
+    <h1 class="text-center mb-0">Фотоальбом Whisk & Wonder</h1>
+</div>
+{% for event in events %}
+<div class="{% if forloop.counter|divisibleby:2 %}part2{% endif %}">
+    <div class="container mt-5">
+        <div
+            class="row g-0 bg-body-first position-relative align-items-center {% if forloop.counter|divisibleby:2 %}flex-row-reverse{% endif %}">
+            <div class="col-md-5 mb-md-0 p-md-4">
+                <div id="carousel{{ forloop.counter }}" class="carousel slide"
+                    data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        {% for image in event.images %}
+                        <div
+                            class="carousel-item {% if forloop.first %}active{% endif %}">
+                            <img src="{% static image %}" class="d-block w-100 custom-img"
+                                alt="Фото мероприятия {{ event.title }}">
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <!-- Кнопки для управления каруселью -->
+                    <button class="carousel-control-prev" type="button"
+                        data-bs-target="#carousel{{ forloop.counter }}"
+                        data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon"
+                            aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button"
+                        data-bs-target="#carousel{{ forloop.counter }}"
+                        data-bs-slide="next">
+                        <span class="carousel-control-next-icon"
+                            aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-7 p-4 ps-md-0">
+                <h2 class="mt-0">{{ event.title }}</h2>
+                <px>{{ event.description }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
 {% endblock %}

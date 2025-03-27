@@ -1,5 +1,36 @@
 {% extends 'main_page.html' %}
 {% load static %}
- 
 {% block content %}
+<div class="container mt-5 mb-0">
+    <h1>Наши мастера вкуса – команда Whisk & Wonder</h1>
+    <p>В нашей кондитерской работают настоящие профессионалы,
+        которые превращают обычные ингредиенты в волшебные десерты и напитки.
+        Познакомьтесь с нашей командой!</p>
+</div>
+{% for employee in employees_list %}
+<div class="{% if forloop.counter|divisibleby:2 %}part2{% endif %}">
+  <div class="container mt-5">
+    <div
+        class="row g-0 bg-body-first position-relative align-items-center {% if forloop.counter|divisibleby:2 %}flex-row-reverse{% endif %}">
+        <div class="col-md-4 mb-md-0 p-md-4">
+            <img src="{% static employee.image %}" class="w-100 rounded"
+                alt="{{ employee.name }}">
+        </div>
+        <div class="col-md-8 p-4 ps-md-0">
+            <h2 class="mt-0">{{ employee.name }}</h2>
+            <h5>{{ employee.role }}</h5>
+            <p><strong>Опыт:</strong> {{ employee.experience }}</p>
+            <blockquote class="blockquote">{{ employee.quote }}</blockquote>
+            <p>{{ employee.message }}</p>
+            <h5>О работе в Whisk & Wonder</h5>
+            <p>{{ employee.about_work }}</p>
+            <h5>Любимый десерт</h5>
+            <p>{{ employee.favorite_dessert }}</p>
+            <h5>Любимый напиток</h5>
+            <p>{{ employee.favorite_drink }}</p>
+        </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
 {% endblock %}

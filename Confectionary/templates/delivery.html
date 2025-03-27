@@ -1,5 +1,50 @@
 {% extends 'main_page.html' %}
 {% load static %}
- 
+
 {% block content %}
+<div class="container mt-5 mb-0">
+    <h1>Варианты доставки</h1>
+    <hr>
+    <dl class="row">
+        {% for option in delivery_list.options %}
+        <dt class="col-sm-3"><h5>{{ option.type }}</h5></dt>
+        <dd class="col-sm-9">
+            <p><strong>Стоимость:</strong> {{ option.cost }}</p>
+            {% if option.details.address %}
+            <p><strong>Адрес:</strong> {{ option.details.address }}</p>
+            {% endif %}
+            {% if option.details.time %}
+            <p><strong>Время:</strong> {{ option.details.time }}</p>
+            {% endif %}
+            {% if option.details.min_order %}
+            <p><strong>Минимальная сумма заказа:</strong> {{ option.details.min_order }}</p>
+            {% endif %}
+            {% if option.details.delivery_time %}
+            <p><strong>Время доставки:</strong> {{ option.details.delivery_time }}</p>
+            {% endif %}
+            {% if option.details.note %}
+            <p>{{ option.details.note }}</p>
+            {% endif %}
+        </dd>
+        <hr>
+        {% endfor %}
+    </dl>
+</div>
+<div class="container mt-5 mb-0">
+    <h1>Условия доставки</h1>
+    <hr>
+    <dl class="row">
+        {% for key, condition in delivery_list.conditions.items %}
+        <dt class="col-sm-3"><h5>{{ condition.text }}</h5></dt>
+        <dd class="col-sm-9">
+            <div>
+                {% for detail in condition.details %}
+                <p>{{ detail }}</p>
+                {% endfor %}
+            </div>
+        </dd>
+        <hr>
+        {% endfor %}
+    </dl>
+</div>
 {% endblock %}
