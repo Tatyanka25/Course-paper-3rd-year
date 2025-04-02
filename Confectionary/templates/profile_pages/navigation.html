@@ -1,0 +1,16 @@
+{% load static %}
+
+<div class="list-group">
+    <a href="{% url 'Confectionary:profile' %}" class="list-group-item {% if request.resolver_match.url_name == 'profile' %}active list-group-item-danger {% endif %}" 
+       {% if request.resolver_match.url_name == 'profile' %}aria-current="true"{% endif %}>
+        <i class="fas fa-user me-2"></i> Моя информация
+    </a>
+    <a href="{% url 'Confectionary:orders' %}" class="list-group-item {% if request.resolver_match.url_name == 'orders' %}active list-group-item-danger {% endif %}"
+       {% if request.resolver_match.url_name == 'orders' %}aria-current="true"{% endif %}>
+        <i class="fas fa-receipt me-2"></i> Мои заказы
+    </a>
+    <form method="post" action="{% url 'Confectionary:logout' %}" class="mt-3">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline-danger w-100 mb-4">Выйти</button>
+    </form> 
+</div>

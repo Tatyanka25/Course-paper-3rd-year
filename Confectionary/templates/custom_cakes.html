@@ -2,7 +2,19 @@
 {% load static %}
 
 {% block content %}
-<div class="container mt-5 mb-0">
+<div class="container mt-3">
+    {% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'success' %} 
+                <div class="alert alert-success text-center alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+</div>
+<div class="container mb-0">
     <h1>{{ cake_order.title }}</h1>
     <p>{{ cake_order.description }}</p>
     <p>{{ cake_order.order_terms.standard }}</p>
@@ -50,135 +62,139 @@
     <p>
         <button class="btn btn-outline-secondary" type="button"
             data-bs-toggle="collapse" data-bs-target="#collapseExample"
-            aria-expanded="false" aria-controls="collapseExample">
+            aria-expanded="{% if form.errors %}true{% else %}false{% endif %}"
+             aria-controls="collapseExample">
             Форма
         </button>
     </p>
-    <div class="collapse" id="collapseExample">
+    <div class="collapse {% if form.errors %}show{% endif %}" id="collapseExample">
         <div class="row justify-content-center">
-            <div class="col-12 col-md-8 col-lg-5">
-                <div class="card card-body pink_card mb-5">
-                    <button type="button" class="btn-close" aria-label="Close" data-bs-toggle="collapse" data-bs-target="#collapseExample" style="position: absolute; bottom: 10px; right: 10px;"></button>
-                    <form method="POST" action>
+            <div class="col-12 col-md-8 col-lg-8"> 
+                <div class="card card-body pink_card mb-5 pt-5" style="position: relative;">
+                    <button type="button" class="btn-close" aria-label="Close"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#collapseExample"
+                        style="position: absolute; top: 10px; right: 10px; z-index: 10;"></button>
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            {% if message.tags == 'error' %}
+                            <div class="alert alert-danger text-center">
+                                {{ message }}
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="POST" action="{% url 'Confectionary:custom_cakes' %}#collapseExample" id="my-form-id">
                         {% csrf_token %}
 
-                        <div class="form-group">
-                            <label for="first_name"><h5>Имя</h5></label>
-                            <input type="text" id="first_name" name="first_name"
-                                class="form-control col-md-4" placeholder="Иван"
-                                required>
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                            {% endfor %}
                         </div>
+                        {% endif %}
 
-                        <div class="form-group">
-                            <label for="last_name"><h5>Фамилия</h5></label>
-                            <input type="text" id="last_name" name="last_name"
-                                class="form-control" placeholder="Иванов"
-                                required>
-                        </div>
+                        <div class="row">
 
-                        <div class="form-group">
-                            <label for="phone_number"><h5>Номер
-                                    телефона</h5></label>
-                            <input type="tel" id="phone_number"
-                                name="phone_number"
-                                class="form-control"
-                                placeholder="+7 123 456 78 90"
-                                required>
-                        </div>
+                            <div class="col-lg-6"> 
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.first_name.id_for_label }}"><h5>Имя</h5></label>
+                                    {{ form.first_name }}
+                                    {% if form.first_name.errors %}
+                                    <div class="error text-danger mt-1">
+                                        {% for error in form.first_name.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
 
-                        <div class="form-group">
-                            <label><h5>Выбор начинки</h5></label><br>
-                            <label class="radio-inline">
-                                <input type="radio" name="filling"
-                                    value="Шоколадный крем" required> Шоколадный
-                                крем
-                            </label><br>
-                            <label class="radio-inline">
-                                <input type="radio" name="filling"
-                                    value="Крем с ванильным вкусом" required>
-                                Крем с
-                                ванильным вкусом
-                            </label><br>
-                            <label class="radio-inline">
-                                <input type="radio" name="filling"
-                                    value="Фрукты и ягоды" required> Фрукты и
-                                ягоды
-                            </label><br>
-                            <label class="radio-inline">
-                                <input type="radio" name="filling"
-                                    value="Карамель"
-                                    required> Карамель
-                            </label><br>
-                            <label class="radio-inline">
-                                <input type="radio" name="filling" value="Орехи"
-                                    required> Орехи
-                            </label><br>
-                        </div>
+                            <div class="col-lg-6"> 
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.last_name.id_for_label }}"><h5>Фамилия</h5></label>
+                                    {{ form.last_name }}
+                                    {% if form.last_name.errors %}
+                                    <div class="error text-danger mt-1">
+                                        {% for error in form.last_name.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
 
-                        <div class="form-group">
-                            <label for="weight"><h5>Вес торта (кг)</h5></label>
-                            <input type="number" id="weight" name="weight"
-                                class="form-control" step="0.1" min="1"
-                                placeholder="1.5" required>
-                        </div>
+                            <div class="col-lg-6"> 
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.phone_number.id_for_label }}"><h5>Номер телефона</h5></label>
+                                    {{ form.phone_number }}
+                                    {% if form.phone_number.errors %}
+                                    <div class="error text-danger mt-1">
+                                        {% for error in form.phone_number.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
 
-                        <div class="form-group">
-                            <label for="event_date"><h5>Дата
-                                    мероприятия</h5></label>
-                            <input type="date" id="event_date" name="event_date"
-                                class="form-control" placeholder="2025-04-15"
-                                required>
-                        </div>
+                            <div class="col-lg-6"> 
+                                <div class="form-group mb-3">
+                                    <label><h5>Выбор начинки</h5></label><br>
+                                    {{ form.filling }}
+                                    {% if form.filling.errors %}
+                                    <div class="error text-danger mt-1">
+                                        {% for error in form.filling.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
 
-                        <div class="form-group">
-                            <label><h5>Выбор соц. сети для
-                                    связи</h5></label><br>
-                            <label class="radio-inline">
-                                <input type="radio" name="social_media"
-                                    value="ВКонтакте" required> ВКонтакте
-                            </label><br>
-                            <label class="radio-inline">
-                                <input type="radio" name="social_media"
-                                    value="Instagram" required> Instagram
-                            </label><br>
-                            <label class="radio-inline">
-                                <input type="radio" name="social_media"
-                                    value="WhatsApp"
-                                    required> WhatsApp
-                            </label><br>
-                            <label class="radio-inline">
-                                <input type="radio" name="social_media"
-                                    value="Telegram"
-                                    required> Telegram
-                            </label><br>
-                            <label class="radio-inline">
-                                <input type="radio" name="social_media"
-                                    value="Email"
-                                    required> Email
-                            </label><br>
-                        </div>
+                            <div class="col-lg-6"> 
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.weight.id_for_label }}"><h5>Вес торта (кг)</h5></label>
+                                    {{ form.weight }}
+                                    {% if form.weight.errors %}
+                                    <div class="error text-danger mt-1">
+                                        {% for error in form.weight.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
 
-                        <div class="form-group" id="vk_link_field"
-                            style="display: none;">
-                            <label for="vk_link"><h5>Ссылка на страницу
-                                    ВКонтакте</h5></label>
-                            <input type="url" id="vk_link" name="vk_link"
-                                class="form-control"
-                                placeholder="https://vk.com/your_profile">
-                        </div>
+                            <div class="col-lg-6"> 
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.event_date.id_for_label }}"><h5>Дата мероприятия</h5></label>
+                                    {{ form.event_date }}
+                                    {% if form.event_date.errors %}
+                                    <div class="error text-danger mt-1">
+                                        {% for error in form.event_date.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
 
-                        <div class="form-group">
-                            <label for="delivery_method"><h5>Способ
-                                    доставки</h5></label><br>
-                            <label class="radio-inline">
-                                <input type="radio" name="delivery_method"
-                                    value="Самовывоз" required> Самовывоз
-                            </label><br>
-                            <label class="radio-inline">
-                                <input type="radio" name="delivery_method"
-                                    value="Доставка по городу" required>
-                                Доставка
-                            </label><br>
+                             <div class="col-lg-6">
+                                <div class="form-group mb-3">
+                                    <label><h5>Выбор соц. сети для связи</h5></label><br>
+                                    {{ form.social_media }}
+                                    {% if form.social_media.errors %}
+                                    <div class="error text-danger mt-1">
+                                        {% for error in form.social_media.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6"> 
+                                <div class="form-group mb-3">
+                                    <label><h5>Способ доставки</h5></label><br>
+                                    {{ form.delivery_method }}
+                                    {% if form.delivery_method.errors %}
+                                    <div class="error text-danger mt-1">
+                                        {% for error in form.delivery_method.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
                         </div>
 
                         <button type="submit" class="btn mt-3"

@@ -98,6 +98,22 @@ html, body {
 
   /* Showcase */
 
+    .quantity-input::-webkit-outer-spin-button,
+    .quantity-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    .quantity-input {
+        -moz-appearance: textfield;
+        appearance: textfield;
+    }
+
+    .quantity-input:focus {
+        outline: none; 
+        box-shadow: none; 
+        border-color: inherit;
+    }
 
   /* employees */
   blockquote {
@@ -134,5 +150,10 @@ html, body {
   /* custom_cakes */
 
 
+
+
+  .card-header {
+    background-color: #f7ebf5;
+  }
   
   

@@ -1,0 +1,55 @@
+{% extends "main_page.html" %}
+{% load static %}
+
+{% block title %}Вход{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h2>Вход</h2>
+                </div>
+                <div class="card-body pink_card">
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            Неверное имя пользователя или пароль. Попробуйте снова.
+                        </div>
+                    {% endif %}
+
+                    {% if messages %}
+                        {% for message in messages %}
+                          <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post" action="{% url 'Confectionary:login' %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="{{ form.username.id_for_label }}" class="form-label">{{ form.username.label }}</label>
+                            {{ form.username }}
+                            {% if form.username.errors %}
+                                <div class="invalid-feedback d-block">{{ form.username.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3">
+                            <label for="{{ form.password.id_for_label }}" class="form-label">{{ form.password.label }}</label>
+                            {{ form.password }}
+                             {% if form.password.errors %}
+                                <div class="invalid-feedback d-block">{{ form.password.errors|striptags }}</div>
+                             {% endif %}
+                        </div>
+                        <button type="submit" class="btn w-100 mt-3" style="background-color: #721c24; color: white;">Войти</button>
+                        <input type="hidden" name="next" value="{{ next }}">
+                    </form>
+                </div>
+                <div class="card-footer text-center">
+                    <p>Нет аккаунта? <a href="{% url 'Confectionary:register' %}" style="color: #721c24;">Зарегистрируйтесь</a></p>
+                    <p><a href="#">Забыли пароль?</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

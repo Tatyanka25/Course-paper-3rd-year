@@ -1,5 +1,9 @@
-from django.shortcuts import render
-from Confectionary.models import Category, Product
+from django.contrib import messages
+from django.shortcuts import redirect, render
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login
+from Confectionary.models import Category, Product, Customer
+from .forms import CustomUserCreationForm, CustomCakeOrderForm, ProfileEditForm
 
 CATEGORY_ICONS = {
     "Кофе": "img/coffee.png",
@@ -42,7 +46,7 @@ employees_list = [
         "favorite_dessert": "Лимонный тарт – хрустящее тесто, шелковистый крем и легкая кислинка. Абсолютное совершенство!",
         "favorite_drink": "Фирменный латте с соленой карамелью – насыщенный, мягкий и идеально дополняющий десерты.",
         "image": "img/shef_artem.jpg",
-    }
+    },
 ]
 
 events = [
@@ -59,8 +63,8 @@ events = [
             "img/events/open_day_2.jpg",
             "img/events/open_day_3.jpg",
             "img/events/open_day_4.jpg",
-            "img/events/open_day_5.jpg"
-        ]
+            "img/events/open_day_5.jpg",
+        ],
     },
     {
         "title": "Мастер-класс по выпечке",
@@ -76,8 +80,8 @@ events = [
             "img/events/masterclass_3.jpg",
             "img/events/masterclass_4.jpg",
             "img/events/masterclass_5.jpg",
-            "img/events/masterclass_6.jpg"
-        ]
+            "img/events/masterclass_6.jpg",
+        ],
     },
     {
         "title": "Новогодний вечер в Whisk & Wonder",
@@ -93,9 +97,9 @@ events = [
             "img/events/new_year_2.jpg",
             "img/events/new_year_3.jpg",
             "img/events/new_year_4.jpg",
-            "img/events/new_year_5.jpg"
-        ]
-    }
+            "img/events/new_year_5.jpg",
+        ],
+    },
 ]
 
 delivery_list = {
@@ -108,8 +112,8 @@ delivery_list = {
             "details": {
                 "address": "г. Дзержинск, ул. Циолковского, д. 16",
                 "time": "с 10:00 до 20:00",
-                "note": "Уведомим вас, когда заказ будет готов"
-            }
+                "note": "Уведомим вас, когда заказ будет готов",
+            },
         },
         {
             "type": "Доставка по городу",
@@ -117,8 +121,8 @@ delivery_list = {
             "details": {
                 "time": "с 10:00 до 21:00",
                 "min_order": "1500 ₽",
-                "delivery_time": "1-3 часа после готовности заказа"
-            }
+                "delivery_time": "1-3 часа после готовности заказа",
+            },
         },
         {
             "type": "Доставка в пригород",
@@ -126,9 +130,9 @@ delivery_list = {
             "details": {
                 "range": "30 км от города",
                 "min_order": "3000 ₽",
-                "delivery_time": "от 3 часов"
-            }
-        }
+                "delivery_time": "от 3 часов",
+            },
+        },
     ],
     "conditions": {
         "order": {
@@ -136,30 +140,30 @@ delivery_list = {
             "details": [
                 "Заказы принимаем за 1-3 дня до желаемой даты доставки",
                 "Срочные заказы обсуждаются индивидуально",
-                "Оплата: онлайн или наличными при получении"
-            ]
+                "Оплата: онлайн или наличными при получении",
+            ],
         },
         "timing": {
             "text": "Доставка в указанное время",
             "details": [
                 "Мы стараемся доставлять в выбранный интервал, но возможны отклонения до 30 минут из-за дорожной ситуации"
-            ]
+            ],
         },
         "handover": {
             "text": "Передача заказа",
             "details": [
                 "Заказ передается лично получателю или доверенному лицу",
-                "При отсутствии получателя курьер ждет до 15 минут, затем заказ можно забрать самовывозом"
-            ]
+                "При отсутствии получателя курьер ждет до 15 минут, затем заказ можно забрать самовывозом",
+            ],
         },
         "cancellation": {
             "text": "Возврат и отмена",
             "details": [
                 "Отменить заказ можно за 24 часа до доставки",
-                "Возврат возможен только при выявлении брака"
-            ]
-        }
-    }
+                "Возврат возможен только при выявлении брака",
+            ],
+        },
+    },
 }
 
 cake_order = {
@@ -167,15 +171,11 @@ cake_order = {
     "description": "Ни одно торжество не обходится без вкусного торта! В Whisk & Wonder вы можете заказать торт любого размера и дизайна – от нежных классических вариантов до ярких и креативных шедевров. Наши десерты станут идеальным дополнением к дню рождения, свадьбе или уютному семейному вечеру.",
     "order_terms": {
         "standard": "Мы принимаем заказы заранее: за 5-7 дней до мероприятия (в идеале за 10-14 дней).",
-        "urgent": "Если дата свободна, возможны срочные заказы с доплатой."
+        "urgent": "Если дата свободна, возможны срочные заказы с доплатой.",
     },
     "how_to_order": {
         "instructions": "Заполните форму ниже, и мы свяжемся с вами, чтобы обсудить:",
-        "details": [
-            "Начинку",
-            "Декор",
-            "Количество порций / вес торта"
-        ]
+        "details": ["Начинку", "Декор", "Количество порций / вес торта"],
     },
     "payment": {
         "prepayment": "После финального согласования мы закрепим за вами дату по 100% предоплате."
@@ -183,15 +183,59 @@ cake_order = {
     "delivery": {
         "options": [
             "В день мероприятия ваш торт будет доставлен по указанному адресу.",
-            "Торт будет готов к самовывозу в нашей кондитерской по адресу: ул. Циолковского, 16."
+            "Торт будет готов к самовывозу в нашей кондитерской по адресу: ул. Циолковского, 16.",
         ]
     },
     "requirements": {
         "min_weight": "Минимальный вес торта: 2 кг",
-        "price_per_kg": "Стоимость: указана за 1 кг"
+        "price_per_kg": "Стоимость: указана за 1 кг",
     },
-    "final_message": "Сделаем ваш праздник по-настоящему сладким!"
+    "final_message": "Сделаем ваш праздник по-настоящему сладким!",
 }
+
+
+def register_view(request):
+    if request.method == "POST":
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, "Регистрация прошла успешно!")
+            return redirect("Confectionary:profile")
+        else:
+            messages.error(request, "Пожалуйста, исправьте ошибки в форме.")
+    else:
+        form = CustomUserCreationForm()
+    return render(request, "registration/register.html", {"form": form})
+
+
+@login_required
+def profile_view(request):
+    customer_profile, created = Customer.objects.get_or_create(user=request.user)
+    if created:
+        messages.info(request, "Создан профиль пользователя.")
+
+    if request.method == "POST":
+        profile_form = ProfileEditForm(
+            request.POST, instance=customer_profile
+        ) 
+        if profile_form.is_valid():
+            profile_form.save()
+            messages.success(request, "Профиль успешно обновлен.")
+            return redirect("Confectionary:profile")
+        else:
+            messages.error(request, "Пожалуйста, исправьте ошибки в форме.")
+    else:
+        profile_form = ProfileEditForm(instance=customer_profile) 
+
+    context = {
+        "user": request.user,
+        "customer": customer_profile,
+        "profile_form": profile_form, 
+    }
+    print(profile_form)
+    return render(request, "profile_pages/profile.html", context)
+
 
 def main_page(request):
     category_names = CATEGORY_ICONS.keys()
@@ -205,40 +249,45 @@ def main_page(request):
 
     context = {"categories": categories, "popular_products": popular_products}
 
-    return render(
-        request,
-        "main_page.html",
-        context
-    )
+    return render(request, "main_page.html", context)
 
 
 def showcase(request):
     selected_type = request.GET.get("type", "")
-    dessert_category = Category.objects.get(name="Десерты")
-    dessert_products = (
-        Product.objects.filter(category=dessert_category)
-        if dessert_category
-        else Product.objects.none()
-    )
-    if selected_type:
-        dessert_products = dessert_products.filter(type=selected_type)
-    product_types = (
-        Product.objects.filter(category=dessert_category)
-        .exclude(type__isnull=True)
-        .exclude(type__exact="")
-        .values_list("type", flat=True)
-        .distinct()
-        if dessert_category
-        else []
-    )
+    dessert_products = Product.objects.none() 
+    product_types = [] 
 
-    context = { "product_types": product_types, "products": dessert_products, "selected_type": selected_type}
+    try:
+        dessert_category = Category.objects.get(name__iexact="Десерты")
 
-    return render(
-        request,
-        "showcase.html",
-        context
-    )
+        base_in_stock_desserts = Product.objects.filter(
+            category=dessert_category,
+            count_in_stock__gt=0  
+        )
+
+        product_types = base_in_stock_desserts.exclude(
+            type__isnull=True 
+        ).exclude(
+            type__exact=""     
+        ).values_list(
+            "type", flat=True
+        ).distinct().order_by('type') 
+
+        if selected_type:
+            dessert_products = base_in_stock_desserts.filter(type=selected_type)
+        else:
+            dessert_products = base_in_stock_desserts
+
+    except Category.DoesNotExist:
+        pass 
+
+    context = {
+        "product_types": product_types,
+        "products": dessert_products,
+        "selected_type": selected_type,
+    }
+
+    return render(request, "showcase.html", context)
 
 
 def photo_album(request):
@@ -249,8 +298,23 @@ def photo_album(request):
 def custom_cakes(request):
     cake_category = Category.objects.get(name="Торты")
     cakes = Product.objects.filter(category=cake_category)
-
     context = {"cake_order": cake_order, "cakes": cakes}
+
+    if request.method == "POST":
+        form = CustomCakeOrderForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Заказ успешно оформлен!")
+            return redirect(
+                "Confectionary:custom_cakes"
+            ) 
+        else:
+            messages.error(request, "Пожалуйста, исправьте ошибки в форме.")
+    else:
+        form = CustomCakeOrderForm()
+
+    context = {"cake_order": cake_order, "cakes": cakes, "form": form}
+
     return render(request, "custom_cakes.html", context)
 
 
@@ -269,4 +333,8 @@ def trolley(request):
 
 
 def profile(request):
-    return render(request, "profile.html")
+    return render(request, "profile_pages/profile.html")
+
+
+def orders(request):
+    return render(request, "profile_pages/orders.html")

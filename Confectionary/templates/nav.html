@@ -86,18 +86,23 @@
             {% endif %}
             aria-current="page" href="{% url 'Confectionary:trolley' %}">
             <img src="{% static 'img/trolley.png' %}" alt="Корзина" width="30"
-              height="30">
+              height="30" title="Корзина">
           </a>
-          <a
-            {% if request.resolver_match.url_name == 'profile' %}
-            class="nav-link active"
-            {% else %}
-            class="nav-link"
-            {% endif %}
-            aria-current="page" href="{% url 'Confectionary:profile' %}">
-            <img src="{% static 'img/profile.png' %}" alt="Профиль" width="30"
-              height="30">
+          {% if user.is_authenticated %}
+          <a {% if request.resolver_match.url_name == 'profile' %}
+            class="nav-link active" {% else %} class="nav-link" {% endif %}
+            aria-current="page" href="{% url 'Confectionary:profile' %}" title="Профиль {{ user.username }}">
+            <img src="{% static 'img/profile.png' %}"
+              alt="Профиль {{ user.username }}" width="30" height="30">
           </a>
+          {% else %}
+          <a {% if request.resolver_match.url_name == 'login' %}
+            class="nav-link active" {% else %} class="nav-link" {% endif %}
+            aria-current="page" href="{% url 'Confectionary:login' %}">
+            <img src="{% static 'img/profile.png' %}" alt="Войти" width="30"
+              height="30" title="Войти/Зарегистрироваться">
+          </a>
+          {% endif %}
         </div>
       </div>
     </div>

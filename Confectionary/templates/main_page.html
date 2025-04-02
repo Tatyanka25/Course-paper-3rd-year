@@ -13,7 +13,9 @@
     <link href="{% static 'css/confectionary.css' %}" rel="stylesheet">
     <link rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Philosopher:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Philosopher:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+      rel="stylesheet">
   </head>
   <body>
     <div class="content-wrapper">
@@ -63,7 +65,9 @@
           </div>
           <div class="collapse" id="collapseExample">
             <div class="card card-body pink_card menu text-center">
-              <button type="button" class="btn-close" aria-label="Close" data-bs-toggle="collapse" data-bs-target="#collapseExample" style="position: absolute; bottom: 10px; right: 10px;"></button>
+              <button type="button" class="btn-close" aria-label="Close"
+                data-bs-toggle="collapse" data-bs-target="#collapseExample"
+                style="position: absolute; bottom: 10px; right: 10px;"></button>
               <h4 class="text-center">Меню напитков – Whisk & Wonder ☕🍹</h4>
               {% for category in categories %}
               <h6>{{ category.name }}</h6>
@@ -97,19 +101,24 @@
                     <p class="card-text">{{ product.short_description }}</p>
                     <button class="btn btn-sm btn-outline-secondary"
                       data-bs-toggle="modal"
-                      data-bs-target="#productModal">
+                      data-bs-target="#productModal{{ product.id }}">
                       Подробнее
                     </button>
                   </div>
                 </div>
               </div>
-              <div class="modal fade" id="productModal" tabindex="-1"
-                aria-labelledby="productModalLabel" aria-hidden="true">
+              <div class="modal fade"
+                id="productModal{{ product.id }}"
+                tabindex="-1"
+                aria-labelledby="productModalLabel{{ product.id }}"
+                aria-hidden="true"
+                data-bs-backdrop="static"
+                data-bs-keyboard="false">
                 <div class="modal-dialog modal-dialog-centered">
                   <div class="modal-content">
                     <div class="modal-header">
                       <h5 class="modal-title"
-                        id="productModalLabel{{ product.id }}">{{ product.name }}</h5>
+                        id="productModalLabel{{ product.id }}">{{ product.name}}</h5>
                       <button type="button" class="btn-close"
                         data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
@@ -177,6 +186,6 @@
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
       crossorigin="anonymous"></script>
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   </body>
 </html>
