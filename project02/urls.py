@@ -22,6 +22,8 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('Confectionary/', include('Confectionary.urls')),
+    path('accounts/', include('django.contrib.auth.urls')),
+    path('robots.txt', include('robots.urls')),
 ]
 
 if settings.DEBUG:

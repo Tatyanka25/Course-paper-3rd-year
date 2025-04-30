@@ -1,9 +1,18 @@
+from venv import logger
 from django.contrib import messages
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
+from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
-from Confectionary.models import Category, Product, Customer
-from .forms import CustomUserCreationForm, CustomCakeOrderForm, ProfileEditForm
+from Confectionary.models import Category, Product, Customer, Order, OrderItem
+from .forms import (
+    CheckoutForm,
+    CustomUserCreationForm,
+    CustomCakeOrderForm,
+    ProfileEditForm,
+)
+from decimal import Decimal
+
 
 CATEGORY_ICONS = {
     "Кофе": "img/coffee.png",
@@ -206,6 +215,7 @@ def register_view(request):
             messages.error(request, "Пожалуйста, исправьте ошибки в форме.")
     else:
         form = CustomUserCreationForm()
+
     return render(request, "registration/register.html", {"form": form})
 
 
@@ -215,25 +225,39 @@ def profile_view(request):
     if created:
         messages.info(request, "Создан профиль пользователя.")
 
-    if request.method == "POST":
-        profile_form = ProfileEditForm(
-            request.POST, instance=customer_profile
-        ) 
-        if profile_form.is_valid():
-            profile_form.save()
-            messages.success(request, "Профиль успешно обновлен.")
-            return redirect("Confectionary:profile")
+    if request.method == 'POST':
+        form = ProfileEditForm(request.POST, user=request.user)
+        if form.is_valid():
+            cleaned_data = form.cleaned_data
+
+            user = request.user
+            user.first_name = cleaned_data['first_name']
+            user.last_name = cleaned_data['last_name']
+            user.email = cleaned_data['email']
+            user.save() 
+
+            customer_profile.phone = cleaned_data['phone']
+            customer_profile.save() 
+
+            messages.success(request, "Информация профиля успешно обновлена.")
+            return redirect('Confectionary:profile')
         else:
             messages.error(request, "Пожалуйста, исправьте ошибки в форме.")
-    else:
-        profile_form = ProfileEditForm(instance=customer_profile) 
+
+    else: 
+        initial_data = {
+            'first_name': request.user.first_name,
+            'last_name': request.user.last_name,
+            'email': request.user.email,
+            'phone': customer_profile.phone,
+        }
+        form = ProfileEditForm(initial=initial_data, user=request.user)
 
     context = {
         "user": request.user,
         "customer": customer_profile,
-        "profile_form": profile_form, 
+        "form": form,
     }
-    print(profile_form)
     return render(request, "profile_pages/profile.html", context)
 
 
@@ -254,24 +278,23 @@ def main_page(request):
 
 def showcase(request):
     selected_type = request.GET.get("type", "")
-    dessert_products = Product.objects.none() 
-    product_types = [] 
+    dessert_products = Product.objects.none()
+    product_types = []
 
     try:
         dessert_category = Category.objects.get(name__iexact="Десерты")
 
         base_in_stock_desserts = Product.objects.filter(
-            category=dessert_category,
-            count_in_stock__gt=0  
+            category=dessert_category, count_in_stock__gt=0
         )
 
-        product_types = base_in_stock_desserts.exclude(
-            type__isnull=True 
-        ).exclude(
-            type__exact=""     
-        ).values_list(
-            "type", flat=True
-        ).distinct().order_by('type') 
+        product_types = (
+            base_in_stock_desserts.exclude(type__isnull=True)
+            .exclude(type__exact="")
+            .values_list("type", flat=True)
+            .distinct()
+            .order_by("type")
+        )
 
         if selected_type:
             dessert_products = base_in_stock_desserts.filter(type=selected_type)
@@ -279,7 +302,7 @@ def showcase(request):
             dessert_products = base_in_stock_desserts
 
     except Category.DoesNotExist:
-        pass 
+        pass
 
     context = {
         "product_types": product_types,
@@ -305,9 +328,7 @@ def custom_cakes(request):
         if form.is_valid():
             form.save()
             messages.success(request, "Заказ успешно оформлен!")
-            return redirect(
-                "Confectionary:custom_cakes"
-            ) 
+            return redirect("Confectionary:custom_cakes")
         else:
             messages.error(request, "Пожалуйста, исправьте ошибки в форме.")
     else:
@@ -328,13 +349,282 @@ def employees(request):
     return render(request, "employees.html", context)
 
 
+@require_POST
+def trolley_add(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    trolley_session = request.session.get("trolley", {})
+    try:
+        quantity = int(request.POST.get("quantity", 1))
+        if quantity < 1:
+            quantity = 1
+    except (ValueError, TypeError):
+        quantity = 1
+
+    product_id_str = str(product_id)
+    available_stock = product.count_in_stock or 0
+
+    if product_id_str not in trolley_session:
+        if quantity > available_stock:
+            messages.error(
+                request,
+                f"Невозможно добавить {quantity} шт. товара '{product.name}'. В наличии только {available_stock} шт.",
+            )
+            return redirect(request.META.get("HTTP_REFERER", "Confectionary:showcase"))
+        else:
+            trolley_session[product_id_str] = quantity
+            messages.success(
+                request, f"Товар '{product.name}' ({quantity} шт.) добавлен в тележку."
+            )
+    else:
+        if quantity > available_stock:
+            messages.error(
+                request,
+                f"Невозможно установить количество {quantity} шт. для товара '{product.name}'. В наличии только {available_stock} шт.",
+            )
+            return redirect(request.META.get("HTTP_REFERER", "Confectionary:showcase"))
+        else:
+            trolley_session[product_id_str] = quantity
+            messages.success(
+                request,
+                f"Количество товара '{product.name}' в тележке обновлено до {quantity} шт.",
+            )
+
+    request.session["trolley"] = trolley_session
+    request.session.modified = True
+    return redirect("Confectionary:trolley")
+
+
 def trolley(request):
-    return render(request, "trolley.html")
+    trolley_session = request.session.get("trolley", {})
+    trolley_items = []
+    trolley_total_price = Decimal("0.00")
+
+    product_ids = trolley_session.keys()
+    products_in_trolley = Product.objects.filter(id__in=product_ids)
+    products_dict = {str(p.id): p for p in products_in_trolley}
+    items_to_remove = []
+
+    for product_id, quantity in trolley_session.items():
+        product = products_dict.get(product_id)
+        if product:
+            available_stock = product.count_in_stock or 0
+            current_quantity = int(quantity)
+
+            if current_quantity > available_stock:
+                if available_stock > 0:
+                    current_quantity = available_stock
+                    trolley_session[product_id] = current_quantity
+                    messages.warning(
+                        request,
+                        f"Количество товара '{product.name}' уменьшено до {available_stock} шт. (максимум на складе).",
+                    )
+                else:
+                    items_to_remove.append(product_id)
+                    messages.warning(
+                        request,
+                        f"Товар '{product.name}' закончился на складе и был удален из тележки.",
+                    )
+                    continue
+
+            item_total = product.price * current_quantity
+            trolley_items.append(
+                {
+                    "product": product,
+                    "quantity": current_quantity,
+                    "total_price": item_total,
+                    "available_stock": available_stock,
+                }
+            )
+            trolley_total_price += item_total
+        else:
+            items_to_remove.append(product_id)
+            messages.warning(
+                request,
+                f"Товар с ID {product_id} больше не существует и был удален из тележки.",
+            )
+
+    if items_to_remove:
+        for item_id in items_to_remove:
+            if item_id in trolley_session:
+                del trolley_session[item_id]
+        request.session["trolley"] = trolley_session
+        request.session.modified = True
+
+    context = {
+        "trolley_items": trolley_items,
+        "trolley_total_price": trolley_total_price,
+    }
+    return render(request, "trolley.html", context)
 
 
-def profile(request):
-    return render(request, "profile_pages/profile.html")
+@require_POST
+def trolley_update(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    trolley_session = request.session.get("trolley", {})
+    product_id_str = str(product_id)
+
+    if product_id_str not in trolley_session:
+        messages.error(request, "Товар не найден в тележке.")
+        return redirect("Confectionary:trolley")
+
+    try:
+        quantity = int(request.POST.get("quantity"))
+        if quantity < 1:
+            del trolley_session[product_id_str]
+            messages.success(
+                request, f"Товар '{product.name}' удален из тележки."
+            )  
+        else:
+            available_stock = product.count_in_stock or 0
+            if quantity > available_stock:
+                messages.error(
+                    request,
+                    f"Невозможно установить количество {quantity} шт. Максимум на складе: {available_stock} шт.",
+                )
+            else:
+                trolley_session[product_id_str] = quantity
+                messages.success(
+                    request, f"Количество товара '{product.name}' обновлено."
+                )
+
+    except (ValueError, TypeError):
+        messages.error(request, "Некорректное количество.")
+
+    request.session["trolley"] = trolley_session
+    request.session.modified = True
+    return redirect("Confectionary:trolley")
 
 
+@require_POST
+def trolley_remove(request, product_id):
+    trolley_session = request.session.get("trolley", {})
+    product_id_str = str(product_id)
+
+    if product_id_str in trolley_session:
+        del trolley_session[product_id_str]
+        try:
+            product_name = Product.objects.get(id=product_id).name
+            messages.success(
+                request, f"Товар '{product_name}' удален из тележки."
+            ) 
+        except Product.DoesNotExist:
+            messages.success(request, f"Товар удален из тележки.")
+
+        request.session["trolley"] = trolley_session
+        request.session.modified = True
+
+    return redirect("Confectionary:trolley") 
+
+
+@login_required
 def orders(request):
-    return render(request, "profile_pages/orders.html")
+    customer = request.user.customer_profile
+    user_orders = (
+        Order.objects.filter(customer=customer)
+        .prefetch_related("orderitem_set", "orderitem_set__product")
+        .order_by("-order_date")
+    )
+    context = {"orders": user_orders}
+    return render(request, "profile_pages/orders.html", context)
+
+
+def checkout_view(request):
+    trolley_session = request.session.get("trolley", {})
+    if not trolley_session:
+        messages.info(request, "Ваша тележка пуста. Нечего оформлять.")
+        return redirect("Confectionary:trolley")
+
+    trolley_items = []
+    trolley_total_price = Decimal("0.00")
+    product_ids = trolley_session.keys()
+    products_in_trolley = Product.objects.filter(id__in=product_ids)
+    products_dict = {str(p.id): p for p in products_in_trolley}
+    has_error = False
+
+    for product_id, quantity in list(trolley_session.items()):
+        product = products_dict.get(product_id)
+        if product:
+            available_stock = product.count_in_stock or 0
+            current_quantity = int(quantity)
+            if current_quantity > available_stock:
+                messages.error(
+                    request,
+                    f"Товар '{product.name}' закончился или его количество на складе ({available_stock}) меньше заказанного ({current_quantity}). Пожалуйста, обновите тележку.",
+                )
+                if available_stock > 0:
+                    trolley_session[product_id] = available_stock
+                else:
+                    del trolley_session[product_id]
+                request.session.modified = True
+                has_error = True
+                continue
+
+            item_total = product.price * current_quantity
+            trolley_items.append(
+                {
+                    "product": product,
+                    "quantity": current_quantity,
+                    "total_price": item_total,
+                }
+            )
+            trolley_total_price += item_total
+        else:
+            messages.error(
+                request,
+                f"Товар с ID {product_id} больше не доступен и удален из корзины.",
+            )
+            if product_id in trolley_session:
+                del trolley_session[product_id]
+                request.session.modified = True
+            has_error = True
+
+    if has_error:
+        return redirect("Confectionary:trolley")
+
+    if not trolley_items:
+        messages.info(request, "В вашей тележке не осталось доступных товаров.")
+        return redirect("Confectionary:trolley")
+
+    if request.method == "POST":
+        form = CheckoutForm(request.POST, user=request.user)
+        if form.is_valid():
+            customer, _ = Customer.objects.get_or_create(user=request.user)
+            customer.phone = form.cleaned_data["phone"]
+            customer.save()
+
+            order = Order.objects.create(
+                customer=customer,
+                total_price=trolley_total_price,
+                payment_method=form.cleaned_data["payment_method"],
+                comment=form.cleaned_data["comment"],
+            )
+            for item_data in trolley_items:
+                product = item_data["product"]
+                quantity = item_data["quantity"]
+                OrderItem.objects.create(
+                    order=order, product=product, quantity=quantity, price=product.price
+                )
+                if product.count_in_stock is not None:
+                    product.count_in_stock -= quantity
+                    product.save(update_fields=["count_in_stock"])
+
+            del request.session["trolley"]
+            request.session.modified = True
+
+            messages.success(
+                request,
+                f"Ваш заказ №{order.id} успешно оформлен! Мы скоро свяжемся с вами.",
+            )
+            return redirect("Confectionary:orders")
+
+        else:
+            messages.error(request, "Пожалуйста, исправьте ошибки в форме.")
+    else:
+        form = CheckoutForm(user=request.user)
+
+    context = {
+        "trolley_items": trolley_items,
+        "trolley_total_price": trolley_total_price,
+        "form": form,
+    }
+    return render(request, "checkout.html", context)

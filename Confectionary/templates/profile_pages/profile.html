@@ -39,7 +39,6 @@
             <hr>
             <h4>Дополнительная информация</h4>
             <p><strong>Телефон:</strong> {{ customer.phone|default:"Не указан" }}</p>
-            <p><strong>Адрес:</strong> {{ customer.address|default:"Не указан" }}</p>
 
             <a href="#"
                 class="btn btn-sm btn-outline-secondary mt-3"
@@ -47,52 +46,89 @@
                 data-bs-toggle="collapse"
                 data-bs-target="#Information"
                 aria-expanded="false"
-                aria-controls="Information">Редактировать информацию</a>
+                aria-controls="Information">Редактировать информацию
+            </a>
 
-            <div class="collapse" id="Information">
-                <hr>
-                <div
-                    class="d-flex justify-content-between align-items-center mb-3">
-                    <h3 class="mb-0">Редактировать информацию</h3>
-                    <button type="button" class="btn-close" aria-label="Close"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#Information">
-                    </button>
-                </div>
-                <form method="post">
-                    {% csrf_token %}
-
-                    {% if profile_form.non_field_errors %}
-                    <div class="alert alert-danger">
-                        {% for error in profile_form.non_field_errors %}
-                        <p>{{ error }}</p>
-                        {% endfor %}
+                <div class="collapse {% if form.errors %}show{% endif %}" id="Information">
+                    <hr>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3 class="mb-0">Редактировать информацию</h3>
+                        <button type="button" class="btn-close" aria-label="Close"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#Information">
+                        </button>
                     </div>
-                    {% endif %}
 
-                    {% for field in profile_form %}
-                    <div class="form-group mb-3">
-                        <label for="{{ field.id_for_label }}"><h5>{{ field.label
-                                }}</h5></label>
-                        {{ field }}
-                        {% if field.help_text %}
-                        <small class="form-text text-muted">{{
-                            field.help_text|safe }}</small>
-                        {% endif %}
-                        {% if field.errors %}
-                        <div class="error text-danger mt-1">
-                            {% for error in field.errors %}
-                            {{ error }}
+                    {% if messages %}
+                        {% for message in messages %}
+                            {% if message.tags == 'error' %}
+                            <div class="alert alert-danger text-center">
+                                {{ message }}
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                
+                    <form method="post" action="{% url 'Confectionary:profile' %}" id="my-form-profile-id"> 
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
                             {% endfor %}
                         </div>
                         {% endif %}
-                    </div>
-                    {% endfor %}
-                    <button type="submit" class="btn"
-                        style="background-color: #721c24; color: white;">Сохранить
-                        изменения</button>
-                </form>
-            </div>
+                
+                        <div class="mb-3">
+                            <label for="{{ form.first_name.id_for_label }}" class="form-label"><h5>{{ form.first_name.label }}</h5></label>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.first_name.errors %}
+                                        <p>{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                
+                        <div class="mb-3">
+                            <label for="{{ form.last_name.id_for_label }}" class="form-label"><h5>{{ form.last_name.label }}</h5></label>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}
+                                 <div class="text-danger small mt-1">
+                                    {% for error in form.last_name.errors %}
+                                        <p>{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.email.id_for_label }}" class="form-label"><h5>{{ form.email.label }}</h5></label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                 <div class="text-danger small mt-1">
+                                    {% for error in form.email.errors %} <p>{{ error }}</p> {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                
+                        <div class="mb-3">
+                            <label for="{{ form.phone.id_for_label }}" class="form-label"><h5>{{ form.phone.label }}</h5></label>
+                            {{ form.phone }}
+                            {% if form.phone.errors %}
+                                 <div class="text-danger small mt-1">
+                                    {% for error in form.phone.errors %}
+                                        <p>{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                
+                        <button type="submit" class="btn mt-3" style="background-color: #721c24; color: white;">Сохранить изменения</button>
+                    </form>
+                </div>
         </div>
     </div>
 </div>

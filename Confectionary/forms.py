@@ -79,77 +79,6 @@ class CustomAuthenticationForm(AuthenticationForm):
         self.fields["password"].label = "Пароль"
 
 
-class ProfileEditForm(forms.ModelForm):
-    phone = forms.CharField(
-        max_length=20,
-        label="Телефон",
-        widget=forms.TextInput(attrs={"class": "form-control", "type": "tel"}),
-    )
-    address = forms.CharField(
-        required=False,
-        label="Адрес",
-        widget=forms.Textarea(attrs={"class": "form-control", "rows": 3}),
-    )
-
-    class Meta:
-        model = User
-        fields = ["first_name", "last_name", "email"]
-        labels = {
-            "first_name": "Имя",
-            "last_name": "Фамилия",
-            "email": "Адрес электронной почты",
-        }
-        widgets = {
-            "first_name": forms.TextInput(attrs={"class": "form-control"}),
-            "last_name": forms.TextInput(attrs={"class": "form-control"}),
-            "email": forms.EmailInput(attrs={"class": "form-control"}),
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        user_instance = self.instance
-
-        if user_instance and hasattr(user_instance, "customer_profile"):
-            customer_profile = user_instance.customer_profile
-            self.initial["phone"] = customer_profile.phone
-            self.initial["address"] = customer_profile.address
-        else:
-            self.initial["phone"] = ""
-            self.initial["address"] = ""
-
-        original_email = user_instance.email if user_instance else None
-        self.fields["email"].validators = [
-            v
-            for v in self.fields["email"].validators
-            if not isinstance(v, ValidationError)
-        ]
-        self.fields["email"].validators.append(
-            lambda email: self.validate_unique_email(email, original_email)
-        )
-
-    def validate_unique_email(self, email, original_email):
-        if email != original_email:
-            if User.objects.filter(email=email).exists():
-                raise forms.ValidationError(
-                    "Этот адрес электронной почты уже используется другим пользователем."
-                )
-
-    def save(self, commit=True):
-        user = super().save(commit=commit)
-        try:
-            customer_profile = user.customer_profile
-        except Customer.DoesNotExist:
-            customer_profile = Customer.objects.create(user=user)
-
-        customer_profile.phone = self.cleaned_data["phone"]
-        customer_profile.address = self.cleaned_data["address"]
-
-        if commit:
-            customer_profile.save()
-
-        return user
-
-
 class CustomCakeOrderForm(forms.ModelForm):
     class Meta:
         model = CustomCakeOrder
@@ -265,3 +194,156 @@ class CustomCakeOrderForm(forms.ModelForm):
                     f"Дата мероприятия должна быть не ранее {min_date_str}."
                 )
         return event_date
+
+
+class CheckoutForm(forms.Form):
+    phone = forms.CharField(
+        label="Контактный телефон",
+        widget=forms.TextInput(attrs={"class": "form-control", "type": "tel"}),
+        required=True,
+    )
+    PAYMENT_CHOICES = [
+        ("cash", "Наличными при получении"),
+        ("card_on_delivery", "Картой при получении"),
+    ]
+    payment_method = forms.ChoiceField(
+        label="Способ оплаты",
+        choices=PAYMENT_CHOICES,
+        widget=forms.Select(attrs={"class": "form-select"}),
+        required=True,
+    )
+    comment = forms.CharField(
+        label="Комментарий к заказу (необязательно)",
+        widget=forms.Textarea(attrs={"class": "form-control", "rows": 2}),
+        required=False,
+    )
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop("user", None)
+        super().__init__(*args, **kwargs)
+        if user and user.is_authenticated:
+            customer_profile = getattr(user, "customer_profile", None)
+            if customer_profile:
+                if not self.initial.get("address") and customer_profile.address:
+                    self.initial["address"] = customer_profile.address
+                if not self.initial.get("phone") and customer_profile.phone:
+                    self.initial["phone"] = customer_profile.phone
+
+    def clean_phone_number(self):
+        phone = self.cleaned_data.get("phone")
+        if phone:
+            cleaned_phone = re.sub(r"[ \-\(\)]", "", phone)
+
+            if cleaned_phone.startswith("+7"):
+                if len(cleaned_phone) != 12 or not cleaned_phone[1:].isdigit():
+                    raise forms.ValidationError(
+                        "Неверный формат номера. После '+7' должно идти 10 цифр."
+                    )
+            elif cleaned_phone.startswith("8"):
+                if len(cleaned_phone) != 11 or not cleaned_phone[1:].isdigit():
+                    raise forms.ValidationError(
+                        "Неверный формат номера. После '8' должно идти 10 цифр."
+                    )
+            else:
+                raise forms.ValidationError(
+                    "Номер телефона должен начинаться с '+7' или '8'."
+                )
+
+            return cleaned_phone
+        return phone
+
+    def save(self, user):
+        customer = Customer.objects.get_or_create(user=user)
+        customer.phone = self.cleaned_data["phone"]
+        customer.save()
+        return customer
+
+class ProfileEditForm(forms.Form):
+    first_name = forms.CharField(
+        max_length=150,
+        required=True, 
+        label="Имя",
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    last_name = forms.CharField(
+        max_length=150,
+        required=True, 
+        label="Фамилия",
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    email = forms.EmailField(
+        required=True, 
+        label="Email",
+        widget=forms.EmailInput(attrs={'class': 'form-control'}),
+        error_messages={
+            'required': 'Пожалуйста, введите ваш email.',
+            'invalid': 'Пожалуйста, введите корректный адрес электронной почты.', 
+        }
+    )
+    phone = forms.CharField(
+        max_length=20,
+        required=False, 
+        label="Телефон",
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+7XXXXXXXXXX'})
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if not email:
+             return None
+        
+        email = email.lower()
+        if self.user and User.objects.filter(email__iexact=email).exclude(pk=self.user.pk).exists():
+             raise forms.ValidationError("Этот email уже используется другим пользователем.")
+        return email
+
+    def clean_phone_number(self):
+        phone = self.cleaned_data.get("phone")
+        if phone:
+            cleaned_phone = re.sub(r"[ \-\(\)]", "", phone)
+
+            if cleaned_phone.startswith("+7"):
+                if len(cleaned_phone) != 12 or not cleaned_phone[1:].isdigit():
+                    raise forms.ValidationError(
+                        "Неверный формат номера. После '+7' должно идти 10 цифр."
+                    )
+            elif cleaned_phone.startswith("8"):
+                if len(cleaned_phone) != 11 or not cleaned_phone[1:].isdigit():
+                    raise forms.ValidationError(
+                        "Неверный формат номера. После '8' должно идти 10 цифр."
+                    )
+            else:
+                raise forms.ValidationError(
+                    "Номер телефона должен начинаться с '+7' или '8'."
+                )
+
+            return cleaned_phone
+        return phone
+    
+    def clean_first_name(self):
+        first_name = self.cleaned_data.get("first_name")
+        if first_name:
+            if not first_name[0].isupper():
+                raise forms.ValidationError("Имя должно начинаться с заглавной буквы.")
+            if not re.fullmatch(r"^[А-Яа-яЁё\-]+$", first_name):
+                raise forms.ValidationError(
+                    "Имя может содержать только русские буквы и дефис."
+                )
+        return first_name
+
+    def clean_last_name(self):
+        last_name = self.cleaned_data.get("last_name")
+        if last_name:
+            if not last_name[0].isupper():
+                raise forms.ValidationError(
+                    "Фамилия должна начинаться с заглавной буквы."
+                )
+            if not re.fullmatch(r"^[А-Яа-яЁё\-]+$", last_name):
+                raise forms.ValidationError(
+                    "Фамилия может содержать только русские буквы и дефис."
+                )
+        return last_name

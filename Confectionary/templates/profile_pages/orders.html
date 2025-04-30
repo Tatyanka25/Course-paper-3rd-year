@@ -1,7 +1,7 @@
 {% extends 'main_page.html' %}
 {% load static %}
- 
-{% block title %}Зказы: {{ user.username }}{% endblock %}
+
+{% block title %}Заказы: {{ user.username }}{% endblock %}
 {% block content %}
 <div class="container mt-5 mb-5">
 
@@ -9,24 +9,83 @@
     <hr>
 
     {% if messages %}
-        {% for message in messages %}
-          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-              {{ message }}
-              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          </div>
-        {% endfor %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show"
+        role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"
+            aria-label="Close"></button>
+    </div>
+    {% endfor %}
     {% endif %}
 
     <div class="row">
-        <div class="col-md-4 col-lg-3"> 
+        <div class="col-md-4 col-lg-3">
             {% include 'profile_pages/navigation.html' %}
         </div>
 
-        <div class="col-md-8 col-lg-9"> 
+        <div class="col-md-8 col-lg-9">
 
             <div class="d-flex justify-content-between align-items-center mb-4">
-                 <h3>Мои заказы</h3>
+                <h3>Мои заказы</h3>
             </div>
+
+            {% if orders %}
+            {% for order in orders %}
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-light">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="mb-0">Заказ №{{ order.id }}</h5>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            {% if order.status == 'ready' or order.status == 'received' %}
+                            <span class="badge bg-success">{{ order.get_status_display }}</span>
+                            {% elif order.status == 'processing' %}
+                            <span class="badge bg-info">{{ order.get_status_display }}</span>
+                            {% elif order.status == 'cancelled' %}
+                            <span class="badge bg-danger">{{ order.get_status_display }}</span>
+                            {% else %}
+                            <span class="badge bg-warning text-dark">{{ order.get_status_display }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-sm-6">
+                            <strong>Общая стоимость:</strong> {{ order.total_price }} руб.
+                        </div>
+                        <div class="col-sm-6">
+                            <strong>Способ оплаты:</strong> {{ order.get_payment_method_display }}
+                        </div>
+                    </div>
+
+                    <h6>Товары в заказе:</h6>
+                    <ul class="list-group list-group-flush">
+                        {% for item in order.orderitem_set.all %}
+                        <li
+                            class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <div>
+                                <h6>{{ item.product.name }}</h6>
+                            </div>
+                            <span class="text-muted">{{ item.quantity }} шт. x {{ item.price }} руб.</span>
+                            <span class="fw-bold">{{ item.get_cost }} руб.</span>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item px-0">В этом заказе почему-то нет товаров.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="alert alert-info" role="alert">
+                У вас пока нет ни одного заказа. <a
+                    href="{% url 'Confectionary:showcase' %}"
+                    class="alert-link">Перейти в каталог?</a>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>

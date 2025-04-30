@@ -1,0 +1,114 @@
+{% extends 'main_page.html' %}
+{% load static %}
+
+{% block title %}Оформление заказа{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Оформление заказа</h1>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show mt-3" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row mt-4">
+        <div class="col-lg-7">
+            <h3>Детали доставки и оплаты</h3>
+                <div class="card card-body pink_card mb-4" style="position: relative;">
+                    <form method="post" action="{% url 'Confectionary:checkout' %}#checkoutFormCollapse">
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <div class="row">
+
+                            <div class="col-12">
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.phone.id_for_label }}"><h5>{{ form.phone.label }}</h5></label>
+                                    {{ form.phone }}
+                                    {% if form.phone.errors %}
+                                    <div class="error text-danger mt-1">
+                                        {% for error in form.phone.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                    {% endif %}
+                                     {% if form.phone.help_text %}
+                                        <small class="form-text text-muted">{{ form.phone.help_text }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                             <div class="col-12">
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.payment_method.id_for_label }}"><h5>{{ form.payment_method.label }}</h5></label>
+                                    {{ form.payment_method }}
+                                    {% if form.payment_method.errors %}
+                                    <div class="error text-danger mt-1">
+                                        {% for error in form.payment_method.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                    {% endif %}
+                                     {% if form.payment_method.help_text %}
+                                        <small class="form-text text-muted">{{ form.payment_method.help_text }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                             <div class="col-12">
+                                <div class="form-group mb-3">
+                                    <label for="{{ form.comment.id_for_label }}"><h5>{{ form.comment.label }}</h5></label>
+                                    {{ form.comment }}
+                                    {% if form.comment.errors %}
+                                    <div class="error text-danger mt-1">
+                                        {% for error in form.comment.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                    {% endif %}
+                                     {% if form.comment.help_text %}
+                                        <small class="form-text text-muted">{{ form.comment.help_text }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                        </div> 
+
+                        <button type="submit" class="btn mt-3"
+                            style="background-color: #721c24; color: white;">
+                            Подтвердить заказ на {{ trolley_total_price }} руб.
+                        </button>
+                         <a href="{% url 'Confectionary:trolley' %}" class="btn btn-outline-secondary mt-3 ms-2">Вернуться в тележку</a>
+                    </form>
+                </div>
+        </div>
+
+        <div class="col-lg-5">
+            <h3>Состав заказа</h3>
+            <ul class="list-group mb-3">
+                {% for item in trolley_items %}
+                <li class="list-group-item d-flex justify-content-between lh-sm">
+                    <div>
+                        <h6 class="my-0">{{ item.product.name }}</h6>
+                        <small class="text-muted">Кол-во: {{ item.quantity }} x {{ item.product.price }} руб.</small>
+                    </div>
+                    <span class="text-muted">{{ item.total_price }} руб.</span>
+                </li>
+                {% endfor %}
+                <li class="list-group-item d-flex justify-content-between bg-light">
+                    <span class="fw-bold">Итого:</span>
+                    <strong class="fw-bold">{{ trolley_total_price }} руб.</strong>
+                </li>
+            </ul>
+             <a href="{% url 'Confectionary:trolley' %}" class="btn btn-sm btn-outline-secondary">Изменить состав заказа</a>
+        </div> 
+
+    </div> 
+</div> 
+{% endblock %}

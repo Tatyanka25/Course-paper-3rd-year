@@ -27,35 +27,27 @@
                                 <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#productModal{{ product.id }}">Подробнее</button>
                             </div>
                             <div class="mt-auto d-flex align-items-center justify-content-between">
-                                <div class="d-flex align-items-center"> 
-                                    <div class="input-group input-group-sm me-2" style="width: 100px;"> 
-                                        <button class="btn btn-outline-secondary btn-minus" type="button"
-                                                data-product-id="{{ product.id }}"
-                                                {% if product.count_in_stock <= 1 %}disabled{% endif %}>-</button> 
-                                        <input type="number"
-                                               class="form-control text-center quantity-input"
-                                               value="1" 
-                                               min="1"
-                                               max="{{ product.count_in_stock }}"
-                                               data-product-id="{{ product.id }}"
-                                               data-max="{{ product.count_in_stock }}"
-                                               aria-label="Количество"
-                                               readonly>
-                                        <button class="btn btn-outline-secondary btn-plus" type="button"
-                                                data-product-id="{{ product.id }}"
-                                                {% if product.count_in_stock <= 1 %}disabled{% endif %}>+</button>
-                                    </div>
-                                    <a href="{% url 'Confectionary:trolley' %}"
-                                       class="btn btn-sm add-to-cart-btn"
-                                       data-product-id="{{ product.id }}"
-                                       style="background-color: #721c24; color: white;">В корзину</a>
+                                <div class="d-flex align-items-center">
+                                    <form action="{% url 'Confectionary:trolley_add' product.id %}" method="post" class="d-flex align-items-center">
+                                        {% csrf_token %}
+                                        <div class="input-group input-group-sm me-2" style="width: 100px;">
+                                             <input type="number"
+                                                   name="quantity"
+                                                   class="form-control text-center quantity-input"
+                                                   value="1"
+                                                   min="1"
+                                                   max="{{ product.count_in_stock }}"
+                                                   aria-label="Количество {{ product.name }}"
+                                                   required>
+                                        </div>
+                                        <button type="submit" class="btn btn-sm add-to-cart-btn" style="background-color: #721c24; color: white;">В корзину</button> {# Текст изменен #}
+                                    </form>
                                 </div>
                             </div> 
                         </div>
                     </div>
                 </div>
 
-                <!-- Модальное окно -->
                 <div class="modal fade" 
                   id="productModal{{ product.id }}" 
                   tabindex="-1" 
