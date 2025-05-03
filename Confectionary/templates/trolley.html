@@ -44,8 +44,8 @@
                 {% for item in trolley_items %}
                 <tr>
                     <td>
-                        {% if item.product.image %}
-                        <img src="{{ item.product.image.url }}"
+                        {% if item.product.image_path %}
+                        <img src="{% static item.product.image_path %}"
                             alt="{{ item.product.name }}"
                             class="img-fluid rounded" style="max-height: 75px;">
                         {% else %}
