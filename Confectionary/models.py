@@ -47,7 +47,7 @@ class Product(models.Model):
         Category, related_name="products", on_delete=models.CASCADE
     )
     is_popular = models.BooleanField(default=False)
-    image = models.ImageField(upload_to="product_images/", null=True, blank=True)
+    image_path = models.CharField(max_length=255, blank=True, null=True)
     type = models.CharField(max_length=100, null=True, blank=True)
     count_in_stock = models.PositiveIntegerField(
         null=True, blank=True, verbose_name="Количество на складе (шт.)"
