@@ -7,7 +7,7 @@ app_name = "Confectionary"
 
 urlpatterns = [
     # path('admin/', admin.site.urls),
-    path("main_page/", views.main_page, name="main_page"),
+    path("", views.main_page, name="main_page"),
     path("showcase/", views.showcase, name="showcase"),
     path("photo_album/", views.photo_album, name="photo_album"),
     path("custom_cakes/", views.custom_cakes, name="custom_cakes"),
