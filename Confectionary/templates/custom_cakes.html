@@ -44,7 +44,7 @@
             {% for cake in cakes %}
             <div class="col-6 col-lg-3 mb-4">
                 <figure class="figure">
-                    <img src="{{ cake.image.url }}"
+                    <img src="{% static product.image_path %}"
                         class="figure-img img-fluid rounded cake_img"
                         alt="{{ cake.name }}">
                     <figcaption class="figure-caption text-center">

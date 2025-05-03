@@ -94,7 +94,7 @@
               {% for product in popular_products %}
               <div class="col-lg-4 col-md-12 mb-4">
                 <div class="card h-100">
-                  <img src="{{ product.image.url }}"
+                  <img src="{% static product.image_path %}"
                     alt="{{ product.name }} image" class="card-img-top">
                   <div class="card-body pink_card">
                     <h5 class="card-title">{{ product.name }}</h5>
