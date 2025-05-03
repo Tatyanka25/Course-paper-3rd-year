@@ -224,8 +224,6 @@ class CheckoutForm(forms.Form):
         if user and user.is_authenticated:
             customer_profile = getattr(user, "customer_profile", None)
             if customer_profile:
-                if not self.initial.get("address") and customer_profile.address:
-                    self.initial["address"] = customer_profile.address
                 if not self.initial.get("phone") and customer_profile.phone:
                     self.initial["phone"] = customer_profile.phone
 
