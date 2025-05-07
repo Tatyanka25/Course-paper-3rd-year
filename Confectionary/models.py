@@ -213,3 +213,36 @@ class CustomCakeOrder(models.Model):
 
     def __str__(self):
         return f"Заказ {self.id}: {self.first_name} {self.last_name} - {self.filling}, {self.weight} кг"
+
+
+class Employee(models.Model):
+    name = models.CharField(max_length=100, verbose_name="Имя")
+    role = models.CharField(max_length=150, verbose_name="Должность")
+    experience = models.TextField(verbose_name="Опыт")
+    quote = models.TextField(verbose_name="Цитата")
+    message = models.TextField(verbose_name="Сообщение от сотрудника")
+    about_work = models.TextField(verbose_name="О работе в Whisk & Wonder")
+    favorite_dessert = models.CharField(max_length=255, verbose_name="Любимый десерт")
+    favorite_drink = models.CharField(max_length=255, verbose_name="Любимый напиток")
+    image_path = models.CharField(
+        max_length=255,
+        verbose_name="Путь к изображению (static)",
+        help_text="Пример: img/barista.jpg",
+    )
+
+    def __str__(self):
+        return f"{self.name} - {self.role}"
+
+class Event(models.Model):
+    title = models.CharField(max_length=255, verbose_name="Название мероприятия")
+    description = models.TextField(verbose_name="Описание мероприятия")
+
+    def __str__(self):
+        return self.title
+    
+class EventImage(models.Model):
+    event = models.ForeignKey(Event, related_name='images', on_delete=models.CASCADE, verbose_name="Мероприятие")
+    image_path = models.CharField(max_length=255, verbose_name="Путь к изображению (static)", help_text="Пример: img/events/open_day_1.jpg")
+
+    def __str__(self):
+        return self.image_path

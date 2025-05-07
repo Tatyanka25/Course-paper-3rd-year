@@ -18,26 +18,36 @@
 [
   {
     "@context": "https://schema.org",
-    "@type": "ImageGallery",
-    "name": "{{ self.block.title.render|escapejs }}",\
-    "description": "{{ self.block.meta_description.render|escapejs }}", 
+    "@type": "CollectionPage", 
+    "name": "{{ self.block.title.render|escapejs }}",
+    "description": "{{ self.block.meta_description.render|escapejs }}",
     "url": "{{ request.build_absolute_uri }}",
-    "isPartOf": { 
+    "isPartOf": {
       "@type": "WebSite",
-      "url": "{{ request.scheme }}://{{ request.get_host }}{% url 'Confectionary:main_page' %}", 
+      "url": "{{ request.scheme }}://{{ request.get_host }}{% url 'Confectionary:main_page' %}",
       "name": "Кондитерская Whisk & Wonder"
     }
     {% if events %}
-    ,"hasPart": [
-        {% for event in events %}
-            {% for image_path in event.images %}
-            {
-                "@type": "ImageObject",
-                "contentUrl": "{{ request.scheme }}://{{ request.get_host }}{% static image_path %}",
-                "caption": "Фото с мероприятия '{{ event.title|escapejs }}'" 
-            }{% if not forloop.parentloop.last or not forloop.last %},{% endif %} 
+    ,"mainEntity": [
+      {% for event in events %}
+      {
+        "@type": "Event", 
+        "name": "{{ event.title|escapejs }}",
+        "description": "{{ event.description|striptags|truncatechars:150|escapejs }}", 
+        "location": {
+            "@type": "Place",
+            "name": "Кондитерская Whisk & Wonder",
+            "address": { "@type": "PostalAddress", "streetAddress": "ул. Циолковского, 16", "addressLocality": "Дзержинск" }
+        },
+        {% if event.images.all %}
+        "image": [
+            {% for img_obj in event.images.all %}
+            "{{ request.scheme }}://{{ request.get_host }}{% static img_obj.image_path %}"{% if not forloop.last %},{% endif %}
             {% endfor %}
-        {% endfor %}
+        ]
+        {% endif %}
+      }{% if not forloop.last %},{% endif %}
+      {% endfor %}
     ]
     {% endif %}
   },
@@ -48,12 +58,12 @@
       "@type": "ListItem",
       "position": 1,
       "name": "Главная",
-      "item": "{{ request.scheme }}://{{ request.get_host }}{% url 'Confectionary:main_page' %}" 
+      "item": "{{ request.scheme }}://{{ request.get_host }}{% url 'Confectionary:main_page' %}"
     },{
       "@type": "ListItem",
       "position": 2,
-      "name": "Фотоальбом", 
-      "item": "{{ request.build_absolute_uri }}" 
+      "name": "Фотоальбом",
+      "item": "{{ request.build_absolute_uri }}"
     }]
   }
 ]
@@ -70,39 +80,47 @@
         <div
             class="row g-0 bg-body-first position-relative align-items-center {% if forloop.counter|divisibleby:2 %}flex-row-reverse{% endif %}">
             <div class="col-md-5 mb-md-0 p-md-4">
-                <div id="carousel{{ forloop.counter }}" class="carousel slide"
+                {% if event.images.all %}
+                <div id="carousel{{ event.id }}" class="carousel slide"
                     data-bs-ride="carousel">
                     <div class="carousel-inner">
-                        {% for image in event.images %}
+                        {% for img_obj in event.images.all %}
                         <div
                             class="carousel-item {% if forloop.first %}active{% endif %}">
-                            <img src="{% static image %}" class="d-block w-100 custom-img"
-                                alt="Фото мероприятия {{ event.title }}">
+                            <img src="{% static img_obj.image_path %}" class="d-block w-100 custom-img"
+                            alt="Фото {{ forloop.counter }} с мероприятия {{ event.title }}">
                         </div>
                         {% endfor %}
                     </div>
                     <button class="carousel-control-prev" type="button"
-                        data-bs-target="#carousel{{ forloop.counter }}"
+                        data-bs-target="#carousel{{ event.id }}"
                         data-bs-slide="prev">
                         <span class="carousel-control-prev-icon"
                             aria-hidden="true"></span>
                         <span class="visually-hidden">Previous</span>
                     </button>
                     <button class="carousel-control-next" type="button"
-                        data-bs-target="#carousel{{ forloop.counter }}"
+                        data-bs-target="#carousel{{ event.id }}"
                         data-bs-slide="next">
                         <span class="carousel-control-next-icon"
                             aria-hidden="true"></span>
                         <span class="visually-hidden">Next</span>
                     </button>
+                    {% else %}
+                    <p class="text-center text-muted">Нет фотографий для этого мероприятия.</p>
+                    {% endif %}
                 </div>
             </div>
             <div class="col-md-7 p-4 ps-md-0">
                 <h2 class="mt-0">{{ event.title }}</h2>
-                <px>{{ event.description }}</p>
+                <px>{{ event.description|linebreaksbr }}</p>
             </div>
         </div>
     </div>
+</div>
+{% empty %} 
+<div class="container mt-5">
+    <p class="text-center">Пока нет фотоотчетов о мероприятиях.</p>
 </div>
 {% endfor %}
 {% endblock %}

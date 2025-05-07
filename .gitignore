@@ -2,5 +2,6 @@ __pycache__
 db.sqlite3
 confectionary_backup.dump
 local_backup.dump
+last_backup.dump
 staticfiles/
 .env
