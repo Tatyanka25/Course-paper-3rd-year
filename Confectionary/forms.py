@@ -61,6 +61,30 @@ class CustomUserCreationForm(UserCreationForm):
                 "Этот адрес электронной почты уже используется."
             )
         return email
+    
+    def clean_first_name(self):
+        first_name = self.cleaned_data.get("first_name")
+        if first_name:
+            if not first_name[0].isupper():
+                raise forms.ValidationError("Имя должно начинаться с заглавной буквы.")
+            if not re.fullmatch(r"^[А-Яа-яЁё\-]+$", first_name):
+                raise forms.ValidationError(
+                    "Имя может содержать только русские буквы и дефис."
+                )
+        return first_name
+    
+    def clean_last_name(self):
+        last_name = self.cleaned_data.get("last_name")
+        if last_name:
+            if not last_name[0].isupper():
+                raise forms.ValidationError(
+                    "Фамилия должна начинаться с заглавной буквы."
+                )
+            if not re.fullmatch(r"^[А-Яа-яЁё\-]+$", last_name):
+                raise forms.ValidationError(
+                    "Фамилия может содержать только русские буквы и дефис."
+                )
+        return last_name
 
 
 class CustomAuthenticationForm(AuthenticationForm):
