@@ -8,7 +8,7 @@ class StaticViewSitemap(Sitemap):
     def items(self):
         return [
             'Confectionary:main_page',
-            'Confectionary:showcase', 
+            'Confectionary:showcase_all', 
             'Confectionary:photo_album',
             'Confectionary:custom_cakes',
             'Confectionary:delivery',
