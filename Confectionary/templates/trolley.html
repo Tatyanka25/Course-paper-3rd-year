@@ -1,11 +1,55 @@
 {% extends 'main_page.html' %}
 {% load static %}
 
-{% block title %}Ваша корзина{% endblock %} {# Текст изменен #}
+{% block title %}Ваша корзина | Кондитерская Whisk & Wonder - Дзержинск Нижегородская область{% endblock %}
+
+{% block meta_description %}Просмотрите и отредактируйте товары в вашей корзине перед оформлением заказа в кондитерской Whisk & Wonder.{% endblock %}
+
+{% block canonical_url %}
+<link rel="canonical" href="{{ request.build_absolute_uri }}">
+{% endblock canonical_url %}
+
+{% block meta_robots %}
+<meta name="robots" content="noindex, follow">
+{% endblock meta_robots %}
+
+{% block schema_markup %}
+<script type="application/ld+json">
+[
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage", 
+    "name": "{{ self.block.title.render|escapejs }}", 
+    "description": "{{ self.block.meta_description.render|escapejs }}", 
+    "url": "{{ request.build_absolute_uri }}", 
+    "isPartOf": { 
+      "@type": "WebSite",
+      "url": "{{ request.scheme }}://{{ request.get_host }}{% url 'Confectionary:main_page' %}", 
+      "name": "Кондитерская Whisk & Wonder"
+    }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Главная",
+      "item": "{{ request.scheme }}://{{ request.get_host }}{% url 'Confectionary:main_page' %}" 
+    },{
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Корзина", 
+      "item": "{{ request.build_absolute_uri }}" 
+    }]
+  }
+]
+</script>
+{% endblock schema_markup %}
 
 {% block content %}
 <div class="container mt-5">
-    <h1>Ваша корзина</h1> {# Текст изменен #}
+    <h1>Ваша корзина</h1> 
 
     {% if messages %}
     {% for message in messages %}
@@ -23,7 +67,7 @@
         <h4 class="alert-heading">Ваша корзина пуста!</h4> 
         <p>Похоже, вы еще ничего не добавили. Самое время это исправить!</p>
         <hr>
-        <a href="{% url 'Confectionary:showcase' %}"
+        <a href="{% url 'Confectionary:showcase_all' %}"
             class="btn btn-danger mb-0">Перейти в онлайн-витрину</a>
     </div>
     {% else %}
@@ -58,7 +102,7 @@
                     <td class="text-center">{{ item.product.price }} руб.</td>
                     <td class="text-center">
                         <form
-                            action="{% url 'Confectionary:trolley_update' item.product.id %}"
+                            action="{% url 'Confectionary:trolley_update' item.product.slug %}"
                             method="post"
                             class="d-inline-flex align-items-center">
                             {% csrf_token %}
@@ -82,7 +126,7 @@
                     <td class="text-end">{{ item.total_price }} руб.</td>
                     <td class="text-center">
                         <form
-                            action="{% url 'Confectionary:trolley_remove' item.product.id %}"
+                            action="{% url 'Confectionary:trolley_remove' item.product.slug %}"
                             method="post" class="d-inline">
                             {% csrf_token %}
                             <button type="submit"

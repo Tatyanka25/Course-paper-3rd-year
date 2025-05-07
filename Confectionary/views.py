@@ -225,31 +225,31 @@ def profile_view(request):
     if created:
         messages.info(request, "Создан профиль пользователя.")
 
-    if request.method == 'POST':
+    if request.method == "POST":
         form = ProfileEditForm(request.POST, user=request.user)
         if form.is_valid():
             cleaned_data = form.cleaned_data
 
             user = request.user
-            user.first_name = cleaned_data['first_name']
-            user.last_name = cleaned_data['last_name']
-            user.email = cleaned_data['email']
-            user.save() 
+            user.first_name = cleaned_data["first_name"]
+            user.last_name = cleaned_data["last_name"]
+            user.email = cleaned_data["email"]
+            user.save()
 
-            customer_profile.phone = cleaned_data['phone']
-            customer_profile.save() 
+            customer_profile.phone = cleaned_data["phone"]
+            customer_profile.save()
 
             messages.success(request, "Информация профиля успешно обновлена.")
-            return redirect('Confectionary:profile')
+            return redirect("Confectionary:profile")
         else:
             messages.error(request, "Пожалуйста, исправьте ошибки в форме.")
 
-    else: 
+    else:
         initial_data = {
-            'first_name': request.user.first_name,
-            'last_name': request.user.last_name,
-            'email': request.user.email,
-            'phone': customer_profile.phone,
+            "first_name": request.user.first_name,
+            "last_name": request.user.last_name,
+            "email": request.user.email,
+            "phone": customer_profile.phone,
         }
         form = ProfileEditForm(initial=initial_data, user=request.user)
 
@@ -276,10 +276,12 @@ def main_page(request):
     return render(request, "main_page.html", context)
 
 
-def showcase(request):
-    selected_type = request.GET.get("type", "")
+def showcase(request, type_slug=None):
     dessert_products = Product.objects.none()
-    product_types = []
+    product_types_with_slugs = {}
+    page_title = "Витрина десертов | Кондитерская Whisk & Wonder"
+    meta_description = "Посмотрите наш ассортимент свежих десертов ручной работы: пирожные, эклеры, чизкейки и многое другое в кондитерской Whisk & Wonder."
+    current_type_name = None
 
     try:
         dessert_category = Category.objects.get(name__iexact="Десерты")
@@ -287,27 +289,57 @@ def showcase(request):
         base_in_stock_desserts = Product.objects.filter(
             category=dessert_category, count_in_stock__gt=0
         )
-
-        product_types = (
+        types_data = (
             base_in_stock_desserts.exclude(type__isnull=True)
             .exclude(type__exact="")
-            .values_list("type", flat=True)
+            .exclude(type_slug__isnull=True)
+            .exclude(type_slug__exact="")
+            .values("type", "type_slug")
             .distinct()
             .order_by("type")
         )
 
-        if selected_type:
-            dessert_products = base_in_stock_desserts.filter(type=selected_type)
+        product_types_with_slugs = {
+            item["type"]: item["type_slug"] for item in types_data
+        }
+
+        if type_slug:
+            dessert_products = base_in_stock_desserts.filter(type_slug=type_slug)
+            current_type_name = next(
+                (
+                    name
+                    for name, slug in product_types_with_slugs.items()
+                    if slug == type_slug
+                ),
+                None,
+            )
+
+            if current_type_name:
+                page_title = f"{current_type_name.capitalize()} - Десерты | Кондитерская Whisk & Wonder"
+                meta_description = f"Купить {current_type_name.lower()} десерты онлайн. Свежие {current_type_name.lower()} десерты на заказ от кондитерской Whisk & Wonder."
+            else:
+                page_title = "Десерты не найдены | Кондитерская Whisk & Wonder"
+                meta_description = "Выбранный тип десертов не найден или отсутствует."
+                dessert_products = Product.objects.none()
+
         else:
             dessert_products = base_in_stock_desserts
+            current_type_name = None
 
     except Category.DoesNotExist:
-        pass
+        page_title = "Десерты не найдены | Кондитерская Whisk & Wonder"
+        meta_description = "Категория в данный момент недоступна."
+        product_types_with_slugs = {}
+        dessert_products = Product.objects.none()
+        current_type_name = None
 
     context = {
-        "product_types": product_types,
+        "product_types_with_slugs": product_types_with_slugs,
         "products": dessert_products,
-        "selected_type": selected_type,
+        "selected_type_slug": type_slug,
+        "page_title": page_title,
+        "meta_description": meta_description,
+        "current_type_name": current_type_name,
     }
 
     return render(request, "showcase.html", context)
@@ -350,8 +382,8 @@ def employees(request):
 
 
 @require_POST
-def trolley_add(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
+def trolley_add(request, product_slug):
+    product = get_object_or_404(Product, slug=product_slug)
     trolley_session = request.session.get("trolley", {})
     try:
         quantity = int(request.POST.get("quantity", 1))
@@ -360,7 +392,7 @@ def trolley_add(request, product_id):
     except (ValueError, TypeError):
         quantity = 1
 
-    product_id_str = str(product_id)
+    product_id_str = str(product.id)
     available_stock = product.count_in_stock or 0
 
     if product_id_str not in trolley_session:
@@ -369,7 +401,9 @@ def trolley_add(request, product_id):
                 request,
                 f"Невозможно добавить {quantity} шт. товара '{product.name}'. В наличии только {available_stock} шт.",
             )
-            return redirect(request.META.get("HTTP_REFERER", "Confectionary:showcase"))
+            return redirect(
+                request.META.get("HTTP_REFERER", "Confectionary:showcase_all")
+            )
         else:
             trolley_session[product_id_str] = quantity
             messages.success(
@@ -381,7 +415,9 @@ def trolley_add(request, product_id):
                 request,
                 f"Невозможно установить количество {quantity} шт. для товара '{product.name}'. В наличии только {available_stock} шт.",
             )
-            return redirect(request.META.get("HTTP_REFERER", "Confectionary:showcase"))
+            return redirect(
+                request.META.get("HTTP_REFERER", "Confectionary:showcase_all")
+            )
         else:
             trolley_session[product_id_str] = quantity
             messages.success(
@@ -458,22 +494,20 @@ def trolley(request):
 
 
 @require_POST
-def trolley_update(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
+def trolley_update(request, product_slug):
+    product = get_object_or_404(Product, slug=product_slug)
     trolley_session = request.session.get("trolley", {})
-    product_id_str = str(product_id)
+    product_id_str = str(product.id)
 
     if product_id_str not in trolley_session:
         messages.error(request, "Товар не найден в тележке.")
-        return redirect("Confectionary:trolley")
+        return redirect("Confectionary:trolley_view")
 
     try:
         quantity = int(request.POST.get("quantity"))
         if quantity < 1:
             del trolley_session[product_id_str]
-            messages.success(
-                request, f"Товар '{product.name}' удален из тележки."
-            )  
+            messages.success(request, f"Товар '{product.name}' удален из тележки.")
         else:
             available_stock = product.count_in_stock or 0
             if quantity > available_stock:
@@ -496,24 +530,18 @@ def trolley_update(request, product_id):
 
 
 @require_POST
-def trolley_remove(request, product_id):
+def trolley_remove(request, product_slug):
+    product = get_object_or_404(Product, slug=product_slug)
     trolley_session = request.session.get("trolley", {})
-    product_id_str = str(product_id)
+    product_id_str = str(product.id)
 
     if product_id_str in trolley_session:
         del trolley_session[product_id_str]
-        try:
-            product_name = Product.objects.get(id=product_id).name
-            messages.success(
-                request, f"Товар '{product_name}' удален из тележки."
-            ) 
-        except Product.DoesNotExist:
-            messages.success(request, f"Товар удален из тележки.")
-
+        messages.success(request, f"Товар '{product.name}' удален из тележки.")
         request.session["trolley"] = trolley_session
         request.session.modified = True
 
-    return redirect("Confectionary:trolley") 
+    return redirect("Confectionary:trolley")
 
 
 @login_required

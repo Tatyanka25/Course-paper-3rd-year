@@ -19,8 +19,9 @@ class CustomerAdmin(admin.ModelAdmin):
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ("name", "description")
+    list_display = ("name", "description", "slug")
     search_fields = ("name",)
+    prepopulated_fields = {'slug': ('name',)}
 
 
 @admin.register(Product)
@@ -33,10 +34,13 @@ class ProductAdmin(admin.ModelAdmin):
         "count_in_stock",
         "is_popular",
         "type",
+        "type_slug",
+        "slug"
     )
     list_filter = ("category", "is_popular", "type")
     search_fields = ("name", "description", "short_description")
     list_editable = ("price", "quantity", "count_in_stock", "is_popular")
+    prepopulated_fields = {'slug': ('name',), 'type_slug': ('type',)}
 
 
 class OrderItemInline(admin.TabularInline):

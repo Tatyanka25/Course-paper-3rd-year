@@ -22,14 +22,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY')
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = os.environ.get("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS_STR = os.environ.get('ALLOWED_HOSTS')
+ALLOWED_HOSTS_STR = os.environ.get("ALLOWED_HOSTS")
 if ALLOWED_HOSTS_STR:
-    ALLOWED_HOSTS = ALLOWED_HOSTS_STR.split(',')
+    ALLOWED_HOSTS = ALLOWED_HOSTS_STR.split(",")
 else:
     ALLOWED_HOSTS = []
 
@@ -44,9 +44,10 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "whitenoise.runserver_nostatic",
-    "django.contrib.sites",
-    "Confectionary",
     "robots",
+    "django.contrib.sites",
+    "django.contrib.sitemaps",
+    "Confectionary",
 ]
 
 MIDDLEWARE = [
@@ -87,9 +88,9 @@ WSGI_APPLICATION = "project02.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default=f"postgresql://postgres:12345@localhost:4002/сonfectionary", 
-        conn_max_age=600 
+    "default": dj_database_url.config(
+        default=f"postgresql://postgres:12345@localhost:4002/сonfectionary",
+        conn_max_age=600,
     )
 }
 
@@ -129,9 +130,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
@@ -150,9 +151,9 @@ AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
 ]
 
-CSRF_TRUSTED_ORIGINS_STR = os.environ.get('CSRF_TRUSTED_ORIGINS')
+CSRF_TRUSTED_ORIGINS_STR = os.environ.get("CSRF_TRUSTED_ORIGINS")
 if CSRF_TRUSTED_ORIGINS_STR:
-    CSRF_TRUSTED_ORIGINS = CSRF_TRUSTED_ORIGINS_STR.split(',')
+    CSRF_TRUSTED_ORIGINS = CSRF_TRUSTED_ORIGINS_STR.split(",")
 else:
     CSRF_TRUSTED_ORIGINS = []
 

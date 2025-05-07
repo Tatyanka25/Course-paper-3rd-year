@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.urls import reverse
 
 
 class Customer(models.Model):
@@ -32,9 +33,32 @@ def save_user_customer(sender, instance, **_kwargs):
 class Category(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
+    slug = models.SlugField(max_length=110, unique=True, db_index=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.name)
+            if not base_slug:
+                object_id_part = str(self.id) if self.id else "temp-category"
+                base_slug = f"category-{object_id_part}"
+            slug = base_slug
+            counter = 1
+            queryset = Category.objects.all()
+            if self.id:
+                queryset = queryset.exclude(id=self.id)
+            while queryset.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Category: {self.name}"
+
+    def get_absolute_url(self):
+        return reverse(
+            "Confectionary:category_product", kwargs={"category_slug": self.slug}
+        )
 
 
 class Product(models.Model):
@@ -52,6 +76,33 @@ class Product(models.Model):
     count_in_stock = models.PositiveIntegerField(
         null=True, blank=True, verbose_name="Количество на складе (шт.)"
     )
+    slug = models.SlugField(max_length=265, unique=True, db_index=True, blank=True)
+    type_slug = models.SlugField(
+        max_length=110, db_index=True, blank=True, null=True, unique=False
+    )
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.name)
+            if not base_slug:
+                object_id_part = str(self.id) if self.id else "temp-product"
+                base_slug = f"product-{object_id_part}"
+            slug = base_slug
+            counter = 1
+            queryset = Product.objects.all()
+            if self.id:
+                queryset = queryset.exclude(id=self.id)
+            while queryset.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
+
+        if self.type and not self.type_slug:
+            self.type_slug = slugify(self.type)
+        elif not self.type:
+            self.type_slug = None
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Product: {self.name}"
@@ -98,7 +149,7 @@ class OrderItem(models.Model):
     def get_cost(self):
         if self.price is not None:
             return (Decimal(self.price) * self.quantity).quantize(Decimal("0.01"))
-        return Decimal('0.00')
+        return Decimal("0.00")
 
     def __str__(self):
         return str(self.id)
