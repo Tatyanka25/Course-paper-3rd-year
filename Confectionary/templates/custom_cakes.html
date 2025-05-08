@@ -18,22 +18,22 @@
 [
   {
     "@context": "https://schema.org",
-    "@type": "Service", 
-    "serviceType": "Custom Cake Order", 
-    "name": "{{ self.block.title.render|escapejs }}", 
-    "description": "{{ self.block.meta_description.render|escapejs }}", 
-    "url": "{{ request.build_absolute_uri }}", 
-    "provider": { 
+    "@type": "Service",
+    "serviceType": "Custom Cake Order",
+    "name": "{{ self.block.title.render|escapejs }}",
+    "description": "{{ self.block.meta_description.render|escapejs }}",
+    "url": "{{ request.build_absolute_uri }}",
+    "provider": {
         "@type": "Bakery",
         "name": "Кондитерская Whisk & Wonder",
         "url": "{{ request.scheme }}://{{ request.get_host }}{% url 'Confectionary:main_page' %}"
     },
-    "areaServed": { 
+    "areaServed": {
         "@type": "City",
         "name": "Дзержинск"
-     },
+     }
      {% if cakes %}
-     "makesOffer": [ 
+     ,"makesOffer": [
         {% for cake in cakes %}
         {
             "@type": "Offer",
@@ -42,10 +42,10 @@
                 "name": "{{ cake.name|escapejs }}",
                 "image": "{{ request.scheme }}://{{ request.get_host }}{% static cake.image_path %}"
             }
+        }{% if not forloop.last %},{% endif %}
         {% endfor %}
      ]
      {% endif %}
-
   },
   {
     "@context": "https://schema.org",
@@ -54,12 +54,12 @@
       "@type": "ListItem",
       "position": 1,
       "name": "Главная",
-      "item": "{{ request.scheme }}://{{ request.get_host }}{% url 'Confectionary:main_page' %}" 
+      "item": "{{ request.scheme }}://{{ request.get_host }}{% url 'Confectionary:main_page' %}"
     },{
       "@type": "ListItem",
       "position": 2,
-      "name": "Торты на заказ", 
-      "item": "{{ request.build_absolute_uri }}" 
+      "name": "Торты на заказ",
+      "item": "{{ request.build_absolute_uri }}"
     }]
   }
 ]

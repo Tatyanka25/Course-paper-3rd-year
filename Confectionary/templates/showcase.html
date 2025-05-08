@@ -40,11 +40,9 @@
         "position": {{ forloop.counter }}, 
         "item": { 
             "@type": "Product",
-            "name": "{{ product.name|escapejs }}"
-            {% if product.image %}
-            ,"image": "{{ request.scheme }}://{{ request.get_host }}{% static product.image_path %}"
-            {% endif %}
-            ,"description": "{{ product.short_description|escapejs }}",
+            "name": "{{ product.name|escapejs }}",
+            "image": "{{ request.scheme }}://{{ request.get_host }}{% static product.image_path %}",
+            "description": "{{ product.short_description|escapejs }}",
              "offers": {
                 "@type": "Offer",
                 "priceCurrency": "RUB",
