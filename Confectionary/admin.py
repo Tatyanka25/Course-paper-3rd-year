@@ -9,6 +9,9 @@ from .models import (
     Review,
     Payment,
     CustomCakeOrder,
+    Employee,
+    Event,
+    EventImage
 )
 
 @admin.register(Customer)
@@ -102,3 +105,37 @@ class CustomCakeOrderAdmin(admin.ModelAdmin):
     )
     search_fields = ("first_name", "last_name", "phone_number", "filling")
     readonly_fields = ("created_at",)
+
+@admin.register(Employee)
+class EmployeeAdmin(admin.ModelAdmin):
+    list_display = ('name', 'role', 'favorite_dessert', 'favorite_drink')
+    list_filter = ('role',)
+    search_fields = ('name', 'role', 'quote', 'message', 'about_work')
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'role', 'image_path')
+        }),
+        ('Профессиональная информация', {
+            'fields': ('experience', 'quote', 'message', 'about_work')
+        }),
+        ('Предпочтения', {
+            'fields': ('favorite_dessert', 'favorite_drink')
+        }),
+    )
+
+class EventImageInline(admin.TabularInline): 
+    model = EventImage
+    extra = 1 
+
+@admin.register(Event)
+class EventAdmin(admin.ModelAdmin):
+    list_display = ('title', 'short_description')
+    search_fields = ('title', 'description')
+    inlines = [EventImageInline] 
+
+    def short_description(self, obj):
+        """Создает короткое описание для отображения в списке."""
+        if obj.description and len(obj.description) > 75:
+            return obj.description[:75] + '...'
+        return obj.description
+    short_description.short_description = 'Краткое описание'
