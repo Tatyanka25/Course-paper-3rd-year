@@ -129,8 +129,8 @@ class EventImageInline(admin.TabularInline):
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
-    list_display = ('title', 'short_description')
-    search_fields = ('title', 'description')
+    list_display = ('title', 'short_description', 'event_date')
+    search_fields = ('title', 'description', 'event_date')
     inlines = [EventImageInline] 
 
     def short_description(self, obj):

@@ -236,6 +236,7 @@ class Employee(models.Model):
 class Event(models.Model):
     title = models.CharField(max_length=255, verbose_name="Название мероприятия")
     description = models.TextField(verbose_name="Описание мероприятия")
+    event_date = models.DateField(verbose_name="Дата мероприятия", help_text="Укажите дату проведения мероприятия")
 
     def __str__(self):
         return self.title
