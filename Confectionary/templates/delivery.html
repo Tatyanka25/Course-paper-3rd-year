@@ -24,14 +24,6 @@
     "url": "{{ request.build_absolute_uri }}", 
     "isPartOf": {
       "@type": "WebSite",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "ул. Циолковского, 16",
-        "addressLocality": "Дзержинск",
-        "addressRegion": "Нижегородская область",
-        "postalCode": "606025",
-        "addressCountry": "RU"
-      },
       "url": "{{ request.scheme }}://{{ request.get_host }}{% url 'Confectionary:main_page' %}", 
       "name": "Кондитерская Whisk & Wonder"
     }
@@ -61,7 +53,15 @@
   "provider": {
     "@type": "Bakery",
     "name": "Кондитерская Whisk & Wonder",
-     "url": "{{ request.scheme }}://{{ request.get_host }}{% url 'Confectionary:main_page' %}"
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "ул. Циолковского, 16",
+      "addressLocality": "Дзержинск",
+      "addressRegion": "Нижегородская область",
+      "postalCode": "606025",
+      "addressCountry": "RU"
+    },
+    "url": "{{ request.scheme }}://{{ request.get_host }}{% url 'Confectionary:main_page' %}"
   },
   "areaServed": {
     "@type": "City",
