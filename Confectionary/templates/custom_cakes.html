@@ -40,7 +40,20 @@
             "itemOffered": {
                 "@type": "Product",
                 "name": "{{ cake.name|escapejs }}",
-                "image": "{{ request.scheme }}://{{ request.get_host }}{% static cake.image_path %}"
+                "image": "{{ request.scheme }}://{{ request.get_host }}{% static cake.image_path %}",
+                "offers": {
+                    "@type": "Offer",
+                    "priceCurrency": "RUB",
+                    "price": "{{ cake.price|floatformat:0 }}",
+                    "availability": "https://schema.org/InStock",
+                    "priceSpecification": {
+                        "@type": "PriceSpecification",
+                        "price": "{{ cake.price|floatformat:0 }}", 
+                        "priceCurrency": "RUB",
+                        "valueAddedTaxIncluded": "True", // или False
+                        "description": "Цена за 1 кг (базовая)" 
+                    } 
+                }
             }
         }{% if not forloop.last %},{% endif %}
         {% endfor %}
