@@ -34,6 +34,7 @@
         "@type": "Event", 
         "name": "{{ event.title|escapejs }}",
         "description": "{{ event.description|striptags|truncatechars:150|escapejs }}", 
+        "startDate": "{{ event.event_date|date:"Y-m-d" }}",
         "location": {
             "@type": "Place",
             "name": "Кондитерская Whisk & Wonder",
