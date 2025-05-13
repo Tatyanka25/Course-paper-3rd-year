@@ -1,143 +1,135 @@
 /* Глобальные стили */
 html, body {
-    height: 100%; /* Устанавливаем минимальную высоту в 100% */
-    margin: 0;
-    font-family: 'Philosopher', sans-serif;
-  }
+  height: 100%; /* Устанавливаем минимальную высоту в 100% */
+  margin: 0;
+  font-family: 'Philosopher', sans-serif;
+}
 
-  h1, h2, h3, h4, h5, h6 {
-    font-weight: 700; /* Сделать заголовки жирными */
-  }
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700; /* Сделает заголовки жирными */
+}
 
-  a {
-    text-decoration: none;
-  }
+a {
+  text-decoration: none;
+}
   
-  .content-wrapper {
-    display: flex;
-    flex-direction: column;
-    min-height: 100%;
-  }
+.content-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
   
-  .content {
-    flex: 1; /* Контент будет растягиваться, занимая оставшееся пространство */
-  }
+.content {
+  flex: 1; /* Контент будет растягиваться, занимая оставшееся пространство */
+}
   
-  /* navbar */
-  .navbar {
-    background-color: #fcf5fb; /* Бледно-розовый фон */
-  }
+/* navbar */
+.navbar {
+  background-color: #fcf5fb; /* Бледно-розовый фон */
+}
   
-  /* Стиль для активных ссылок */
-  .navbar .nav-link.active {
-    font-weight: bold; 
-    color: #721c24 !important; 
-  }
+/* Стиль для активных ссылок */
+.navbar .nav-link.active {
+  font-weight: bold; 
+  color: #721c24 !important; 
+}
   
-  /* Стиль для неактивных ссылок */
-  .navbar .nav-link {
-    color: #495057; 
-  }
+/* Стиль для неактивных ссылок */
+.navbar .nav-link {
+  color: #495057; 
+}
   
-  /* Стиль для картинок в navbar */
-  .navbar .d-flex a img {
-    transition: transform 0.3s ease, opacity 0.3s ease; /* Плавное увеличение и изменение прозрачности */
-  }
+/* Стиль для картинок в navbar */
+.navbar .d-flex a img {
+  transition: transform 0.3s ease, opacity 0.3s ease; /* Плавное увеличение и изменение прозрачности */
+}
   
-  /* Эффект на картинки при наведении */
-  .navbar .d-flex a:hover img {
-    transform: scale(1.1); /* Увеличение картинки */
-    opacity: 0.8; /* Немного уменьшить прозрачность */
-  }
+/* Эффект на картинки при наведении */
+.navbar .d-flex a:hover img {
+  transform: scale(1.1); /* Увеличение картинки */
+  opacity: 0.8; /* Немного уменьшить прозрачность */
+}
   
-  /* footer */
-  footer {
-    background-color: #fcf5fb;
-    text-align: center;
-    padding: 0.05rem 0;
-    margin-top: auto; /* Это гарантирует, что футер будет внизу */
-  }
+/* footer */
+footer {
+  background-color: #fcf5fb;
+  text-align: center;
+  padding: 0.05rem 0;
+  margin-top: auto; /* Это гарантирует, что футер будет внизу */
+}
   
-  .footer-icons a {
-    margin-right: 1.5rem;
-  }
+.footer-icons a {
+  margin-right: 1.5rem;
+}
 
-  .footer-icons a:hover img{
-    transform: scale(1.1); /* Увеличение картинки */
-    opacity: 0.8; /* Немного уменьшить прозрачность */
-  }
+.footer-icons a:hover img{
+  transform: scale(1.1); /* Увеличение картинки */
+  opacity: 0.8; /* Немного уменьшить прозрачность */
+}
 
-  .footer-icons a img {
-    display: inline-block;
-    vertical-align: middle;
-  }
+.footer-icons a img {
+  display: inline-block;
+  vertical-align: middle;
+}
   
-  .low_footer {
-    background-color: #f7ebf5;
-  }
+.low_footer {
+  background-color: #f7ebf5;
+}
 
-  /* main_page */
-  .container {
-    margin-bottom: 3rem;
-  }
-  .part2 {
-    background-color: #fcf5fb;
-  }
+/* main_page */
+.container {
+  margin-bottom: 3rem;
+}
 
-  .card {
-    border: 0.2rem solid;
-  }
+.part2 {
+  background-color: #fcf5fb;
+}
 
-  .card-img-top {
-    height: 18rem;
-  }
+.card {
+  border: 0.2rem solid;
+}
 
-  .pink_card {
-    background-color: #fcf5fb;
-  }
+.card-img-top {
+  height: 18rem;
+}
 
-  /* Showcase */
+.pink_card {
+  background-color: #fcf5fb;
+}
 
+/* employees */
+blockquote {
+  color: #721c24;
+}
 
-  /* employees */
-  blockquote {
-    color: #721c24;
-  }
+/* photo_albom */
+.carousel-control-prev, .carousel-control-next {
+  width: 50px;
+  height: 50px;
+  background-color: #f1c6d4; /* Розовый цвет для фона */
+  border-radius: 50%; /* Круглая форма */
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  top: 50%;
+  transform: translateY(-50%);
+}
 
-  /* photo_albom */
-  
-  .carousel-control-prev, .carousel-control-next {
-    width: 50px;
-    height: 50px;
-    background-color: #f1c6d4; /* Розовый цвет для фона */
-    border-radius: 50%; /* Круглая форма */
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    top: 50%;
-    transform: translateY(-50%);
-  }
+.carousel-control-prev-icon, .carousel-control-next-icon {
+  background-color: #000; /* Черные стрелки */
+  border-radius: 50%;
+  padding: 10px;
+}
 
-  .carousel-control-prev-icon, .carousel-control-next-icon {
-    background-color: #000; /* Черные стрелки */
-    border-radius: 50%;
-    padding: 10px;
-  }
+/* delivery */
+dl dt h5{
+  color: #721c24;
+}
 
-  /* delivery */
-
-  dl dt h5{
-    color: #721c24;
-  }
-
-  /* custom_cakes */
-
-
-
-
-  .card-header {
-    background-color: #f7ebf5;
-  }
+/* custom_cakes */
+.card-header {
+  background-color: #f7ebf5;
+}
   
   

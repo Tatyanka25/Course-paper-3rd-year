@@ -233,17 +233,30 @@ class Employee(models.Model):
     def __str__(self):
         return f"{self.name} - {self.role}"
 
+
 class Event(models.Model):
     title = models.CharField(max_length=255, verbose_name="Название мероприятия")
     description = models.TextField(verbose_name="Описание мероприятия")
-    event_date = models.DateField(verbose_name="Дата мероприятия", help_text="Укажите дату проведения мероприятия")
+    event_date = models.DateField(
+        verbose_name="Дата мероприятия", help_text="Укажите дату проведения мероприятия"
+    )
 
     def __str__(self):
         return self.title
-    
+
+
 class EventImage(models.Model):
-    event = models.ForeignKey(Event, related_name='images', on_delete=models.CASCADE, verbose_name="Мероприятие")
-    image_path = models.CharField(max_length=255, verbose_name="Путь к изображению (static)", help_text="Пример: img/events/open_day_1.jpg")
+    event = models.ForeignKey(
+        Event,
+        related_name="images",
+        on_delete=models.CASCADE,
+        verbose_name="Мероприятие",
+    )
+    image_path = models.CharField(
+        max_length=255,
+        verbose_name="Путь к изображению (static)",
+        help_text="Пример: img/events/open_day_1.jpg",
+    )
 
     def __str__(self):
         return self.image_path
