@@ -160,7 +160,7 @@
         {% if user.is_authenticated %}
           <a href="{% url 'Confectionary:checkout' %}" class="btn btn-success">Оформить заказ</a>
         {% else %}
-          <a href="{% url 'login' %}?next={% url 'Confectionary:checkout' %}" class="btn btn-success">Войти и оформить заказ</a>
+          <a href="{% url 'Confectionary:login' %}?next={% url 'Confectionary:checkout' %}" class="btn btn-success">Войти и оформить заказ</a>
         {% endif %}
     </div>
     {% endif %}
